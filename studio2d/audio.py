@@ -113,6 +113,11 @@ def create_mix(scenes,durations,voices,tmp):
             smooth=np.convolve(speech,np.ones(11,dtype=np.float32)/11,mode='same')
             speech=(.80*smooth + .20*speech).astype('float32')
         for rel,clip,gain,pan in effect_events(scene):_add(foley,clip,pos+rel,gain,pan)
+        # End on a quiet, audible knock after the final spoken line.
+        if scene is scenes[-1]:
+            last_hit=pos+min(dur-.30,len(speech)/SR+.23)
+            if last_hit>pos and last_hit<pos+dur-.11:
+                _add(foley,_wood_knock(517),last_hit,.74,-.15)
         start=round((pos+.18)*SR);size=min(len(speech),n-start)
         if size>0:
             speech=speech[:size].astype('float32')
