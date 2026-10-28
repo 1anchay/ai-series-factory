@@ -67,25 +67,39 @@ def door(d,w,h,opened=0.0):
 
 def person(d,x,y,scale=1.,phase=0,pose='stand',silhouette=False):
     s=scale
-    def p(dx,dy):return (int(x+s*dx),int(y+s*dy))
+    # 2D acting: shifting weight and a ground shadow, no camera zoom.
+    step=math.sin(phase*7.0) if pose=='walk' else 0.0
+    sway=1.9*math.sin(phase*2.2)
+    body_x=x+sway*0.7
+    d.ellipse((x-27*s,y+79*s,x+29*s,y+90*s),fill=(10,14,24))
+    def p(dx,dy):return (int(body_x+s*dx),int(y+s*dy))
     skin=(21,25,32) if silhouette else FACE
     coat=(15,18,29) if silhouette else (48,76,103)
     hair=(7,8,15)
     # legs with small visible stepping during walking
-    walk=math.sin(phase*7)*8 if pose=='walk' else 0
+    walk=step*9 if pose=='walk' else 0
     d.line((p(-9,50),p(-12-walk,85)),fill=coat,width=max(3,int(10*s)))
     d.line((p(9,50),p(12+walk,85)),fill=coat,width=max(3,int(10*s)))
+    d.line((p(-12-walk,85),p(-23-walk,85)),fill=(16,18,27),width=max(3,int(5*s)))
+    d.line((p(12+walk,85),p(23+walk,85)),fill=(16,18,27),width=max(3,int(5*s)))
     d.rounded_rectangle((*p(-20,-1),*p(20,54)),radius=max(2,int(5*s)),fill=coat)
     raise_arm=pose in ('reach','listen')
     if raise_arm:
-        d.line((p(14,11),p(34,-17+math.sin(phase*3)*2)),fill=coat,width=max(3,int(10*s)))
-        d.ellipse((*p(29,-23),*p(39,-13)),fill=skin)
+        gesture=ease(norm(phase/1.2))
+        elbow=p(27,16-16*gesture)
+        hand=p(30+5*math.sin(phase*1.5),26-45*gesture)
+        d.line((p(15,12),elbow),fill=coat,width=max(3,int(10*s)))
+        d.line((elbow,hand),fill=coat,width=max(3,int(9*s)))
+        d.ellipse((hand[0]-5*s,hand[1]-5*s,hand[0]+5*s,hand[1]+5*s),fill=skin)
+        d.line((p(-17,12),p(-21+math.sin(phase*2)*2,44)),fill=coat,width=max(3,int(9*s)))
     else:
-        d.line((p(-17,12),p(-22+math.sin(phase*2)*2,46)),fill=coat,width=max(3,int(10*s)))
-        d.line((p(18,12),p(23-math.sin(phase*2)*2,46)),fill=coat,width=max(3,int(10*s)))
+        d.line((p(-17,12),p(-22+step*3,46)),fill=coat,width=max(3,int(10*s)))
+        d.line((p(18,12),p(23-step*3,46)),fill=coat,width=max(3,int(10*s)))
     bob=math.sin(phase*2.2)*1.5
     d.ellipse((*p(-17,-36+bob),*p(17,-1+bob)),fill=skin)
     d.pieslice((*p(-19,-39+bob),*p(20,-8+bob)),180,355,fill=hair)
+    hair_offset=3*math.sin(phase*1.8)
+    d.line((p(-14,-28+bob),p(-19+hair_offset,-8+bob)),fill=hair,width=max(2,int(3*s)))
     if not silhouette:
         blink=abs(math.sin(phase*.75))>.986
         for ex in [-7,8]:
@@ -127,13 +141,13 @@ def osc(d,x0,y0,width,height,t,power=1):
         arr.append((x0+i,mid+dy))
     if len(arr)>1:d.line(arr,fill=(94,235,214),width=3)
 
-def hud(d,w,h,shot,t):
+def hud(d,w,h,shot,t,episode_num=1):
     # persistent viewer-orienting HUD inspired by the sample's effectiveness, not copied artwork
     d.rounded_rectangle((12,13,114,42),radius=8,fill=(26,35,52),outline=(65,83,105),width=2)
     d.rectangle((21,22,47,33),outline=CREAM,width=1)
     d.rectangle((47,25,50,30),fill=CREAM)
-    d.rectangle((24,25,34,30),fill=(181,70,83))
-    draw_text(d,(58,20),'СИГНАЛ 01',10,CREAM)
+    d.rectangle((24,25,24+int(12*max(.14,1-episode_num/10)),30),fill=(181,70,83))
+    draw_text(d,(58,20),f'ЭФИР {episode_num:02d}',10,CREAM)
     d.rounded_rectangle((212,13,348,42),radius=8,fill=(26,35,52),outline=(65,83,105),width=2)
     mm=int((t+shot*3)/60)
     sec=int(t+shot*3)%60
@@ -214,6 +228,8 @@ def object_scene(im, kind, t, dur, index, rng_seed=12):
             d.line((350,y,255,y+int((474-y)*.38)),fill=(50,69,83),width=2)
         d.rectangle((119,294,241,464),fill=(16,28,41),outline=(67,76,84),width=4)
         d.line((180,294,180,464),fill=(58,67,78),width=2)
+        beam=4*math.sin(t*1.7+index)
+        d.polygon([(174+beam,229),(183+beam,229),(219+beam,464),(137+beam,464)],fill=(31,43,55))
         x,y=180,210
         flashes=(kind=='flashes' and (0.15<t<.40 or 1.05<t<1.28 or 1.95<t<2.18))
         lit=(kind=='hall' and sin(t*5)>-.2) or flashes or (kind=='shadow' and sin(t*2)>.4)
@@ -305,6 +321,9 @@ def object_scene(im, kind, t, dur, index, rng_seed=12):
         chars=min(len(sentence),int(t*7))
         draw_text(d,(202,291),sentence[:chars],13,REDD)
         d.line((245+5*sin(t*2),319,265+4*sin(t*2),357),fill=(58,53,55),width=6)
+        if chars<len(sentence) and int(t*5)%2==0:
+            cursor_x=202+font(13).getlength(sentence[:chars])
+            d.line((cursor_x,292,cursor_x,307),fill=REDD,width=2)
     elif kind=='door':
         studio(d,w,h)
         door(d,w,h,min(.34,ease((t-1.4)/2.0)*.32))
