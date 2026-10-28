@@ -1,0 +1,82 @@
+name: Frequency Zero — voiced 2D series
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'studio2d/**'
+      - 'episodes/001.json'
+      - '.github/workflows/motion-story.yml'
+  workflow_dispatch:
+    inputs:
+      episode:
+        description: Episode to render
+        default: '001'
+        required: true
+        type: choice
+        options: ['001']
+      tts:
+        description: Voice synthesis (edge first, Piper fallback)
+        default: 'auto'
+        type: choice
+        options: ['auto', 'edge', 'piper']
+      resolution:
+        description: Output width (9:16)
+        default: '720'
+        type: choice
+        options: ['360','720']
+      fps:
+        description: Frames per second
+        default: '20'
+        type: choice
+        options: ['18','20','24']
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg fonts-dejavu-core
+          python -m pip install -r studio2d/requirements.txt
+      - name: Cache Piper voice (backup)
+        uses: actions/cache@v4
+        with:
+          path: voice_models
+          key: frequency-zero-irina-v1
+      - name: Check script and episode
+        run: |
+          python -m compileall -q studio2d
+          python studio2d/validate.py --episode episodes/${{ inputs.episode }}.json
+      - name: Render with Russian narration
+        env:
+          SERIES_EDGE_VOICE: ru-RU-SvetlanaNeural
+        run: |
+          python studio2d/render.py \
+            --episode episodes/${{ inputs.episode }}.json \
+            --output output/frequency_zero_${{ inputs.episode }}.mp4 \
+            --voice '${{ inputs.tts }}' \
+            --width '${{ inputs.resolution }}' \
+            --fps '${{ inputs.fps }}'
+      - name: Verify dimensions and audio stream
+        run: |
+          ffprobe -v error -show_entries stream=codec_type,width,height -of json output/frequency_zero_${{ inputs.episode }}.mp4 > output/verify.json
+          python studio2d/validate.py --video output/frequency_zero_${{ inputs.episode }}.mp4 --width '${{ inputs.resolution }}'
+      - name: Upload voiced episode
+        uses: actions/upload-artifact@v4
+        with:
+          name: frequency-zero-voiced-episode-${{ inputs.episode }}
+          path: |
+            output/*.mp4
+            output/verify.json
+          if-no-files-found: error
+          retention-days: 14
