@@ -1,0 +1,41 @@
+name: Build free episode
+on:
+  workflow_dispatch:
+    inputs:
+      episode:
+        description: Episode number
+        required: true
+        default: '001'
+        type: string
+      voice:
+        description: Narration
+        default: 'true'
+        type: choice
+        options: ['true', 'false']
+permissions:
+  contents: read
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          sudo apt-get update -qq
+          sudo apt-get install -qq -y ffmpeg fonts-dejavu-core
+          python -m pip install -r requirements.txt
+      - name: Render video
+        env:
+          EPISODE: ${{ inputs.episode }}
+          VOICE: ${{ inputs.voice }}
+        run: |
+          python scripts/render.py --episode "episodes/${EPISODE}.json" --output "output/episode_${EPISODE}.mp4" $( [ "$VOICE" = 'false' ] && echo --no-tts || true )
+      - uses: actions/upload-artifact@v4
+        with:
+          name: episode-${{ inputs.episode }}
+          path: output/*.mp4
+          if-no-files-found: error
+          retention-days: 7
