@@ -4,10 +4,11 @@ on:
   workflow_dispatch:
     inputs:
       episode:
-        description: Episode number (e.g. 001)
+        description: Choose an existing episode
         required: true
         default: '001'
-        type: string
+        type: choice
+        options: ['001']
       voice:
         description: Generate Russian narration
         default: 'true'
@@ -62,7 +63,11 @@ jobs:
           RESOLUTION: ${{ inputs.resolution }}
           FPS: ${{ inputs.fps }}
         run: |
-          test -f "episodes/${EPISODE}.json" || (echo "Episode not found" && exit 1)
+          if [ ! -f "episodes/${EPISODE}.json" ]; then
+            echo "::error::Episode ${EPISODE} not found. Available episodes:"
+            find episodes -maxdepth 1 -type f -name '*.json' -printf '%f\n' | sort
+            exit 1
+          fi
           args=()
           if [ "$VOICE" = "false" ]; then args+=(--no-tts); fi
           python scripts/render.py \
