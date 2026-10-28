@@ -1,38 +1,80 @@
-name: Build free episode
+name: Build free cinematic episode
+
 on:
   workflow_dispatch:
     inputs:
       episode:
-        description: Episode number
+        description: Episode number (e.g. 001)
         required: true
         default: '001'
         type: string
       voice:
-        description: Narration
+        description: Generate Russian narration
         default: 'true'
         type: choice
         options: ['true', 'false']
+      narrator:
+        description: Russian narrator voice
+        default: 'irina'
+        type: choice
+        options: ['irina', 'dmitri', 'denis', 'ruslan']
+      resolution:
+        description: Video width, 9:16
+        default: '720'
+        type: choice
+        options: ['360', '540', '720', '1080']
+      fps:
+        description: Frames per second
+        default: '20'
+        type: choice
+        options: ['12', '18', '20', '24']
+
 permissions:
   contents: read
+
 jobs:
   render:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: |
+      - name: Install render requirements
+        run: |
           sudo apt-get update -qq
           sudo apt-get install -qq -y ffmpeg fonts-dejavu-core
+          python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
-      - name: Render video
+      - name: Cache downloaded voice model
+        uses: actions/cache@v4
+        with:
+          path: voices
+          key: piper-russian-${{ inputs.narrator }}-medium-v1
+      - name: Check Python sources
+        run: python -m compileall -q scripts
+      - name: Render cinematic episode
         env:
           EPISODE: ${{ inputs.episode }}
           VOICE: ${{ inputs.voice }}
+          SERIES_NARRATOR: ${{ inputs.narrator }}
+          RESOLUTION: ${{ inputs.resolution }}
+          FPS: ${{ inputs.fps }}
         run: |
-          python scripts/render.py --episode "episodes/${EPISODE}.json" --output "output/episode_${EPISODE}.mp4" $( [ "$VOICE" = 'false' ] && echo --no-tts || true )
+          test -f "episodes/${EPISODE}.json" || (echo "Episode not found" && exit 1)
+          args=()
+          if [ "$VOICE" = "false" ]; then args+=(--no-tts); fi
+          python scripts/render.py \
+            --episode "episodes/${EPISODE}.json" \
+            --output "output/episode_${EPISODE}.mp4" \
+            --resolution "$RESOLUTION" --fps "$FPS" "${args[@]}"
+      - name: Validate exported video
+        env:
+          EPISODE: ${{ inputs.episode }}
+        run: |
+          ffprobe -v error -show_entries format=duration,size -of json "output/episode_${EPISODE}.mp4"
+          test -s "output/episode_${EPISODE}.mp4"
       - uses: actions/upload-artifact@v4
         with:
           name: episode-${{ inputs.episode }}
