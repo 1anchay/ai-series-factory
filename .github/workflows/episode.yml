@@ -1,26 +1,20 @@
-name: Build free cinematic episode
-
+name: Build cinematic episode v0.7
 on:
   workflow_dispatch:
     inputs:
       episode:
-        description: Choose an existing episode
+        description: Available episode
         required: true
         default: '001'
         type: choice
         options: ['001']
-      voice:
-        description: Generate Russian narration
-        default: 'true'
-        type: choice
-        options: ['true', 'false']
       narrator:
-        description: Russian narrator voice
+        description: Russian voice (Edge Neural first, Piper fallback)
         default: 'irina'
         type: choice
-        options: ['irina', 'dmitri', 'denis', 'ruslan']
+        options: ['irina', 'dmitri']
       resolution:
-        description: Video width, 9:16
+        description: Width (9:16)
         default: '720'
         type: choice
         options: ['360', '540', '720', '1080']
@@ -28,11 +22,9 @@ on:
         description: Frames per second
         default: '20'
         type: choice
-        options: ['12', '18', '20', '24']
-
+        options: ['12', '20', '24']
 permissions:
   contents: read
-
 jobs:
   render:
     runs-on: ubuntu-latest
@@ -42,47 +34,44 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Install render requirements
+      - name: Install video & narration tools
         run: |
           sudo apt-get update -qq
           sudo apt-get install -qq -y ffmpeg fonts-dejavu-core
-          python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
-      - name: Cache downloaded voice model
+          python -m pip install 'edge-tts>=7,<9'
+      - name: Cache fallback Russian narrator
         uses: actions/cache@v4
         with:
           path: voices
           key: piper-russian-${{ inputs.narrator }}-medium-v1
       - name: Check Python sources
         run: python -m compileall -q scripts
-      - name: Render cinematic episode
+      - name: Make full episode with compulsory voice
         env:
           EPISODE: ${{ inputs.episode }}
-          VOICE: ${{ inputs.voice }}
           SERIES_NARRATOR: ${{ inputs.narrator }}
           RESOLUTION: ${{ inputs.resolution }}
           FPS: ${{ inputs.fps }}
         run: |
-          if [ ! -f "episodes/${EPISODE}.json" ]; then
-            echo "::error::Episode ${EPISODE} not found. Available episodes:"
-            find episodes -maxdepth 1 -type f -name '*.json' -printf '%f\n' | sort
-            exit 1
-          fi
-          args=()
-          if [ "$VOICE" = "false" ]; then args+=(--no-tts); fi
-          python scripts/render.py \
-            --episode "episodes/${EPISODE}.json" \
+          test -f "episodes/${EPISODE}.json" || (echo "::error::Episode not found"; exit 1)
+          python scripts/director.py --episode "episodes/${EPISODE}.json" \
             --output "output/episode_${EPISODE}.mp4" \
-            --resolution "$RESOLUTION" --fps "$FPS" "${args[@]}"
-      - name: Validate exported video
+            --resolution "$RESOLUTION" --fps "$FPS" --tts auto
+      - name: Validate file with audio
         env:
           EPISODE: ${{ inputs.episode }}
         run: |
-          ffprobe -v error -show_entries format=duration,size -of json "output/episode_${EPISODE}.mp4"
+          ffprobe -v error -show_entries stream=codec_type,codec_name -show_entries format=duration,size \
+            -of json "output/episode_${EPISODE}.mp4" | tee output/validation.json
+          ffprobe -v error -select_streams a:0 -show_entries stream=codec_name -of csv=p=0 \
+            "output/episode_${EPISODE}.mp4" | grep -q aac
           test -s "output/episode_${EPISODE}.mp4"
       - uses: actions/upload-artifact@v4
         with:
-          name: episode-${{ inputs.episode }}
-          path: output/*.mp4
+          name: episode-${{ inputs.episode }}-with-voice
+          path: |
+            output/*.mp4
+            output/validation.json
           if-no-files-found: error
           retention-days: 7
