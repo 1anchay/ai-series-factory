@@ -40,7 +40,7 @@ def main():
             for i,(scene,duration,(samples,backend)) in enumerate(zip(shots,durations,spoken)):
                 for frame in range(int(duration*a.fps)):
                     t=frame/a.fps
-                    im=draw(scene['kind'],t,duration,i,int(doc['episode']))
+                    im=draw(scene['kind'],t,duration,i,int(doc['episode']),scene)
                     im=hud(im,scene['kind'],i,t,duration,int(doc['episode']))
                     im=subtitle_panel(im,scene['voice'],t,len(samples)/SR)
                     proc.stdin.write(im.tobytes())
