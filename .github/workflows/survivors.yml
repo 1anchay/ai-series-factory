@@ -1,0 +1,87 @@
+name: Завтра нас меньше — пилот
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'series/tomorrow_less/**'
+      - '.github/workflows/survivors.yml'
+  workflow_dispatch:
+    inputs:
+      episode:
+        description: Available produced episode
+        required: true
+        default: '001'
+        type: choice
+        options: ['001']
+      voice:
+        description: Russian narration engine
+        required: true
+        default: auto
+        type: choice
+        options: [auto, edge, piper]
+      width:
+        description: Video width (9:16)
+        required: true
+        default: '720'
+        type: choice
+        options: ['360', '720']
+      fps:
+        description: Frames per second
+        required: true
+        default: '20'
+        type: choice
+        options: ['12', '20', '24']
+permissions:
+  contents: read
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      SERIES_EDGE_VOICE: ru-RU-SvetlanaNeural
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install engine
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fonts-dejavu-core
+          python -m pip install -r series/tomorrow_less/studio/requirements.txt
+      - name: Cache free voice models
+        uses: actions/cache@v4
+        with:
+          path: series/tomorrow_less/voice_models
+          key: znm-russian-piper-irina-v1
+      - name: Compile and validate episode data
+        env:
+          EPISODE: ${{ inputs.episode || '001' }}
+        run: |
+          python -m compileall -q series/tomorrow_less/studio
+          test -f "series/tomorrow_less/episodes/${EPISODE}.json"
+          python -c 'import json,os; p="series/tomorrow_less/episodes/"+os.environ["EPISODE"]+".json"; e=json.load(open(p,encoding="utf-8")); assert len(e["scenes"])==14'
+      - name: Render fully narrated short
+        env:
+          EPISODE: ${{ inputs.episode || '001' }}
+          TTS: ${{ inputs.voice || 'auto' }}
+          WIDTH: ${{ inputs.width || '720' }}
+          FPS: ${{ inputs.fps || '20' }}
+        run: |
+          python series/tomorrow_less/studio/render.py \
+            --episode "series/tomorrow_less/episodes/${EPISODE}.json" \
+            --output "output/zavtra_nas_menshe_${EPISODE}.mp4" \
+            --voice "$TTS" --width "$WIDTH" --fps "$FPS"
+      - name: Check that video AND audio exist
+        env:
+          EPISODE: ${{ inputs.episode || '001' }}
+        run: |
+          ffprobe -v error -show_entries format=duration,size -of json "output/zavtra_nas_menshe_${EPISODE}.mp4"
+          ffprobe -v error -select_streams a -show_entries stream=codec_type -of csv=p=0 "output/zavtra_nas_menshe_${EPISODE}.mp4" | grep -q audio
+          test -s "output/zavtra_nas_menshe_${EPISODE}.mp4"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zavtra-nas-menshe-${{ inputs.episode || '001' }}
+          path: output/*.mp4
+          if-no-files-found: error
+          retention-days: 7
