@@ -271,7 +271,30 @@ def load_scene_asset(ep_num, scene, w, h, seed):
             return {'mode': 'layers', 'layers': layers}
     for candidate in (flat_path, flat_path.with_suffix('.jpg'), flat_path.with_suffix('.jpeg'), flat_path.with_suffix('.webp')):
         if candidate.exists():
-            return {'mode': 'flat', 'image': cover_rgba(Image.open(candidate).convert('RGB'), w, h)}
+            source = Image.open(candidate).convert('RGB')
+            # Legacy storyboard extracts contained blurred padding and hard frames.
+            # Crop actual image content, never leave an inset picture in the short.
+            old_storyboard_rois = {
+                '01_city': (65, 0, 470, 720),
+                '03_phone': (70, 242, 390, 724),
+                '04_up': (170, 263, 450, 752),
+                '05_window': (257, 253, 535, 747),
+                '06_smile': (70, 241, 360, 754),
+            }
+            if scene['id'] in old_storyboard_rois and source.size == (540, 960):
+                source = source.crop(old_storyboard_rois[scene['id']])
+            # True center-crop to 9:16; never blur-pad or letterbox.
+            target_ratio = w / h
+            sw, sh = source.size
+            if sw / sh > target_ratio:
+                cw = int(sh * target_ratio)
+                cx = (sw-cw)//2
+                source = source.crop((cx,0,cx+cw,sh))
+            elif sw / sh < target_ratio:
+                ch = int(sw / target_ratio)
+                cy = (sh-ch)//2
+                source = source.crop((0,cy,sw,cy+ch))
+            return {'mode': 'flat', 'image': cover_rgba(source, w, h)}
     return {'mode': 'flat', 'image': cover_rgba(make_art(scene.get('art','city'), w, h, seed), w, h)}
 
 
@@ -310,39 +333,39 @@ def scene_frame(asset, t, duration, scene, num, series, resolution):
                 frame_layer = crop_shift(resized, w, h, 0, -.01)
             frame_img = Image.alpha_composite(frame_img, frame_layer)
 
-    d = ImageDraw.Draw(frame_img, 'RGBA')
+    # V0.4 BUGFIX: RGBA draw directly on RGBA overwrote the image with opaque
+    # black in the bottom third. Draw effects to a transparent overlay instead.
+    atmosphere = Image.new('RGBA', (w, h), (0,0,0,0))
+    d = ImageDraw.Draw(atmosphere,'RGBA')
     rng = random.Random(1000 + num)
-    for _ in range(165):
+    for _ in range(100):
         rx = rng.randrange(w+160)-80
         ry = rng.randrange(h+130)-65
         speed = rng.randrange(250,450)
-        ry = int((ry + speed*t) % (h+140)) - 70
-        d.line((rx,ry,rx+rng.randint(5,14),ry+rng.randint(15,38)), fill=(148,194,222,rng.randint(32,89)), width=1)
+        ry = int((ry+speed*t)%(h+140))-70
+        d.line((rx,ry,rx+rng.randint(5,14),ry+rng.randint(15,38)),
+               fill=(148,194,222,rng.randint(23,65)),width=1)
     rng = random.Random(8888 + num)
-    for _ in range(18):
-        rx = rng.randrange(w+130)-60
-        ry = int((rng.randrange(h+150) + 670*t) % (h+150)) - 75
-        d.line((rx,ry,rx+15,ry+68), fill=(188,225,240,48), width=2)
-    mist = Image.new('RGBA', (w, h), (0,0,0,0))
-    md = ImageDraw.Draw(mist, 'RGBA')
-    for band in range(9):
-        yy2 = int(h * (.58 + band*.04) + math.sin((t+band)*.6)*3)
-        md.rectangle((0, yy2, w, yy2 + 18), fill=(71, 104, 122, max(0, 16-band)))
-    frame_img = Image.alpha_composite(frame_img, mist)
-    d = ImageDraw.Draw(frame_img, 'RGBA')
-    for j in range(18):
-        a = max(0, 24-j)
-        d.rectangle((j*2,j*3,w-j*2-1,h-j*3-1), outline=(0,4,13,a), width=3)
-    for yy3 in range(int(h*.69), h, 3):
-        a = int(174 * (yy3-h*.69) / (h*.31))
-        d.rectangle((0,yy3,w,yy3+3), fill=(0,4,12,a))
+    for _ in range(12):
+        rx=rng.randrange(w+130)-60
+        ry=int((rng.randrange(h+150)+670*t)%(h+150))-75
+        d.line((rx,ry,rx+15,ry+68),fill=(188,225,240,35),width=2)
+    for band in range(7):
+        yy2=int(h*(.58+band*.04)+math.sin((t+band)*.6)*3)
+        d.rectangle((0,yy2,w,yy2+18),fill=(71,104,122,max(0,12-band)))
+    for yy3 in range(int(h*.73),h,3):
+        alpha=int(128*(yy3-h*.73)/(h*.27))
+        d.rectangle((0,yy3,w,yy3+3),fill=(0,4,12,alpha))
+    frame_img=Image.alpha_composite(frame_img,atmosphere)
+    d=ImageDraw.Draw(frame_img)
     tr(d,(int(w*.065),int(h*.045)),series,font(w*.039),(226,234,236,220))
     tr(d,(int(w*.94),int(h*.05)),f'{num:02d}/06',font(w*.025,False),(180,199,206,205),anchor='ra')
-    lines = wrap_text(scene['subtitle'], font(w*.054), w*.86)
-    sy = int(h*.78)
+    # Show the same words the narrator actually says.
+    lines = wrap_text(scene['narration'], font(w*.046), w*.87)
+    sy = int(h*.72)
     for line in lines:
-        tr(d,(w//2,sy),line,font(w*.054),(251,247,237,255),anchor='mt',stroke_width=2,stroke_fill=(4,12,20,220))
-        sy += int(w*.075)
+        tr(d,(w//2,sy),line,font(w*.046),(251,247,237,255),anchor='mt',stroke_width=2,stroke_fill=(4,12,20,220))
+        sy += int(w*.070)
     if num == 1 and t < 2.7:
         alpha = round(255 * min(1, t/.65, (2.7-t)/.6))
         if alpha > 0:
@@ -559,6 +582,8 @@ def render(episode_file, output, resolution, no_tts, fps):
     with tempfile.TemporaryDirectory(prefix='series_') as tmpd:
         tmp = Path(tmpd)
         voices = synth_voices(scenes, tmp, no_tts)
+        if not no_tts and (len(voices) != len(scenes) or any(len(v) < AUDIO_SR // 3 for v in voices)):
+            raise RuntimeError('Narration required but missing in at least one scene')
         lengths = []
         for scene, voice in zip(scenes, voices):
             nominal = float(scene.get('seconds', 5))
