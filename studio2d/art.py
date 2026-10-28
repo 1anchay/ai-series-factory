@@ -269,6 +269,109 @@ def object_scene(im, kind, t, dur, index, rng_seed=12):
         if t>dur-1.9:
             draw_text(d,(180,161),'ПРОДОЛЖЕНИЕ',18,RED,'mm')
             draw_text(d,(180,184),'СЛЕДУЕТ...',16,CREAM,'mm')
+    elif kind=='radio':
+        studio(d,w,h)
+        radio(d,33,212,295,196,pulse=.45+.45*abs(sin(t*6)),knob_angle=t*.28)
+        draw_text(d,(180,171),'ВНЕШНИЙ КАНАЛ',18,RED,'mm')
+        for j in range(3):
+            r=15+j*13+5*sin(t*3+j)
+            d.arc((180-r,321-r,180+r,321+r),205,335,fill=BLUE,width=2)
+    elif kind in ('phone','receiver'):
+        studio(d,w,h)
+        d.rectangle((52,250,308,428),fill=(37,44,54),outline=(103,99,92),width=5)
+        d.rounded_rectangle((75,326,285,406),radius=14,fill=(59,62,66),outline=AMBER,width=4)
+        if kind=='phone':
+            shake=3*sin(t*31) if int(t*3)%2==0 else 0
+            d.rounded_rectangle((94+shake,254,266+shake,321),radius=29,fill=(31,34,43),outline=(133,142,140),width=6)
+            for r in (45,60,80):d.arc((180-r,281-r,180+r,281+r),194,345,fill=RED,width=3)
+            draw_text(d,(180,451),'ВЫЗОВ',20,RED,'mm')
+        else:
+            rx=78+15*ease(p);ry=207-19*ease(p)
+            d.rounded_rectangle((rx,ry,rx+188,ry+63),radius=26,fill=(32,35,42),outline=(152,151,131),width=6)
+            d.arc((102,312,263,415),20,170,fill=BLUE,width=4)
+            draw_text(d,(180,453),'ЛИНИЯ ОТКРЫТА',16,BLUE,'mm')
+    elif kind=='ledger':
+        studio(d,w,h)
+        x0,y0=46,199
+        d.polygon([(x0,y0),(180,y0+10),(180,463),(x0,450)],fill=(209,194,156),outline=(145,135,105))
+        d.polygon([(180,y0+10),(316,y0),(316,450),(180,463)],fill=(232,214,176),outline=(148,133,111))
+        d.line((180,209,180,463),fill=(117,105,86),width=5)
+        for k in range(8):
+            y=242+k*25
+            d.line((61,y,165,y+4),fill=(155,146,125),width=1)
+            d.line((196,y+4,302,y),fill=(155,146,125),width=1)
+        sentence='СЛУШАТЕЛЬ 02' if int(t*2)%3==0 else 'ПРОТОКОЛ 0'
+        chars=min(len(sentence),int(t*7))
+        draw_text(d,(202,291),sentence[:chars],13,REDD)
+        d.line((245+5*sin(t*2),319,265+4*sin(t*2),357),fill=(58,53,55),width=6)
+    elif kind=='door':
+        studio(d,w,h)
+        door(d,w,h,min(.34,ease((t-1.4)/2.0)*.32))
+        for j in range(3):
+            yy=331+j*30
+            if t>1.15+j*.35:
+                d.arc((247-18-j*5,yy-18,247+18+j*5,yy+18),-80,88,fill=RED,width=3)
+    elif kind=='knocks':
+        studio(d,w,h)
+        d.rectangle((83,172,281,499),fill=(41,42,49),outline=(106,104,94),width=8)
+        beats=sum(t > moment for moment in (.8,1.75,2.68))
+        offset=3*sin(t*29) if any(abs(t-moment)<.15 for moment in (.8,1.75,2.68)) else 0
+        d.rectangle((102+offset,185,263+offset,477),fill=(72,65,60),outline=(106,96,82),width=4)
+        d.ellipse((236+offset,332,246+offset,345),fill=AMBER)
+        for j in range(beats):
+            x=108+j*65
+            d.ellipse((x,544,x+38,582),outline=RED,width=4)
+        draw_text(d,(180,160),'КТО СТУЧИТ?',18,CREAM,'mm')
+    elif kind=='mirror':
+        studio(d,w,h)
+        d.rounded_rectangle((46,150,315,481),radius=7,fill=(17,39,50),outline=(138,143,147),width=10)
+        for k in range(11):
+            x=62+k*22
+            d.line((x,166,x+32,468),fill=(43,60,70),width=1)
+        shadow_x=173 + 10*sin(t*2+1.1)
+        person(d,shadow_x,331,1.04,phase=t+1.1,pose='reach',silhouette=True)
+        d.line((77,171,276,445),fill=(99,136,152),width=3)
+        d.line((270,171,84,453),fill=(66,102,114),width=2)
+    elif kind=='map':
+        studio(d,w,h)
+        d.rectangle((38,181,322,478),fill=(23,36,47),outline=(105,120,118),width=5)
+        for i in range(5):
+            x=64+i*48
+            d.line((x,200,x,455),fill=(42,65,74),width=2)
+        for j in range(5):
+            y=219+j*48
+            d.line((57,y,301,y),fill=(42,65,74),width=2)
+        d.line((105,402,241,263),fill=BLUE,width=3)
+        for x,y,num in [(105,402,'9'),(241,263,'10')]:
+            radius=8+2*sin(t*5+num.__len__())
+            d.ellipse((x-radius,y-radius,x+radius,y+radius),fill=RED if num=='10' else AMBER)
+            draw_text(d,(x+15,y-23),num,18,CREAM)
+        draw_text(d,(180,502),'ДВЕ СТАНЦИИ',18,RED,'mm')
+    elif kind=='archive':
+        studio(d,w,h)
+        d.rounded_rectangle((30,187,329,448),radius=11,fill=(46,46,52),outline=(118,109,101),width=5)
+        for i,cx in enumerate((108,251)):
+            cy=307
+            d.ellipse((cx-50,cy-50,cx+50,cy+50),fill=(28,31,40),outline=AMBER,width=5)
+            for a in range(3):
+                angle=t*2.9+a*2*math.pi/3
+                dx=27*sin(angle);dy=27*math.cos(angle)
+                d.ellipse((cx+dx-9,cy+dy-9,cx+dx+9,cy+dy+9),fill=(113,122,122))
+        d.rectangle((98,403,266,422),fill=(23,35,45))
+        draw_text(d,(180,473),'АРХИВ / 1994',17,CREAM,'mm')
+    elif kind=='switch':
+        studio(d,w,h)
+        d.rounded_rectangle((62,177,300,461),radius=12,fill=(48,56,65),outline=(117,118,113),width=6)
+        d.rounded_rectangle((135,222,226,389),radius=10,fill=(26,32,42),outline=(154,144,119),width=4)
+        k=ease(t/max(.1,dur))
+        d.line((180,337,172+20*k,257+95*k),fill=(196,189,152),width=15)
+        d.ellipse((162+20*k,250+95*k,185+20*k,276+95*k),fill=AMBER)
+        for j in range(5):
+            if .35<t<.90:
+                x=200+int(27*sin(t*17+j))
+                y=260+int(j*13)
+                d.line((x,y,x+7,y-11),fill=RED,width=3)
+        draw_text(d,(180,417),'РУЧНОЙ РЕЖИМ',15,CREAM,'mm')
     return im
 
 

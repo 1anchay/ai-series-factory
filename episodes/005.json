@@ -1,0 +1,104 @@
+{
+  "series": "ЧАСТОТА НОЛЬ",
+  "episode": 5,
+  "title": "Архив молчит",
+  "theme": "Нулевая частота",
+  "scenes": [
+    {
+      "id": "s01",
+      "kind": "cold_open",
+      "duration": 5.9,
+      "voice": "За старой панелью я нашла кассету. На ней было написано: «Не воспроизводить».",
+      "speaker": "narrator",
+      "sfx": "tape"
+    },
+    {
+      "id": "s02",
+      "kind": "archive",
+      "duration": 4.6,
+      "voice": "Я нажала на пуск. Лента заскрипела, как будто дышала.",
+      "speaker": "narrator",
+      "sfx": "tape"
+    },
+    {
+      "id": "s03",
+      "kind": "radio",
+      "duration": 5.0,
+      "voice": "Из динамика заговорили сразу несколько голосов. И все были моими.",
+      "speaker": "radio",
+      "sfx": "radio_voice"
+    },
+    {
+      "id": "s04",
+      "kind": "ledger",
+      "duration": 4.6,
+      "voice": "Один голос просил закрыть дверь. Другой — немедленно открыть.",
+      "speaker": "narrator",
+      "sfx": "pencil"
+    },
+    {
+      "id": "s05",
+      "kind": "clock",
+      "duration": 4.6,
+      "voice": "Каждый называл одно и то же время: две четырнадцать.",
+      "speaker": "narrator",
+      "sfx": "clock"
+    },
+    {
+      "id": "s06",
+      "kind": "archive",
+      "duration": 3.7,
+      "voice": "На обороте кассеты я нашла фамилии сотрудников.",
+      "speaker": "narrator",
+      "sfx": "paper"
+    },
+    {
+      "id": "s07",
+      "kind": "ledger",
+      "duration": 3.0,
+      "voice": "Напротив каждого стояло слово «слушатель».",
+      "speaker": "narrator",
+      "sfx": "pencil"
+    },
+    {
+      "id": "s08",
+      "kind": "mirror",
+      "duration": 3.7,
+      "voice": "Только последняя строка отличалась. «Наблюдатель: не назначен».",
+      "speaker": "narrator",
+      "sfx": "glass"
+    },
+    {
+      "id": "s09",
+      "kind": "switch",
+      "duration": 3.7,
+      "voice": "Я попыталась остановить ленту. Кнопка провалилась внутрь.",
+      "speaker": "narrator",
+      "sfx": "switch"
+    },
+    {
+      "id": "s10",
+      "kind": "signal",
+      "duration": 5.9,
+      "voice": "Включилась последняя запись. «Если слышишь это — не верь ни одному будущему».",
+      "speaker": "radio",
+      "sfx": "radio_voice"
+    },
+    {
+      "id": "s11",
+      "kind": "tomorrow",
+      "duration": 3.2,
+      "voice": "На экране возникла дата завтрашнего дня.",
+      "speaker": "narrator",
+      "sfx": "beep"
+    },
+    {
+      "id": "s12",
+      "kind": "final",
+      "duration": 5.4,
+      "voice": "А под ней — мой собственный номер пропуска. В графе «наблюдатель».",
+      "speaker": "narrator",
+      "sfx": "sting"
+    }
+  ]
+}

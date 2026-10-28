@@ -1,0 +1,104 @@
+{
+  "series": "ЧАСТОТА НОЛЬ",
+  "episode": 2,
+  "title": "Кто услышал?",
+  "theme": "Нулевая частота",
+  "scenes": [
+    {
+      "id": "s01",
+      "kind": "cold_open",
+      "duration": 5.4,
+      "voice": "Я думала, что радиостанция пуста. Пока рация не назвала моё имя.",
+      "speaker": "radio",
+      "sfx": "radio_scan"
+    },
+    {
+      "id": "s02",
+      "kind": "hero",
+      "duration": 4.1,
+      "voice": "Я выключила питание. Но красный огонёк не погас.",
+      "speaker": "narrator",
+      "sfx": "switch"
+    },
+    {
+      "id": "s03",
+      "kind": "radio",
+      "duration": 5.4,
+      "voice": "Из динамика прозвучало: «Не отвечай. Кто услышит тебя — станет следующим».",
+      "speaker": "radio",
+      "sfx": "radio_voice"
+    },
+    {
+      "id": "s04",
+      "kind": "phone",
+      "duration": 4.6,
+      "voice": "В старом телефоне зазвонил звонок. Хотя провод был перерезан.",
+      "speaker": "narrator",
+      "sfx": "ring"
+    },
+    {
+      "id": "s05",
+      "kind": "receiver",
+      "duration": 3.7,
+      "voice": "Я подняла трубку. И услышала хриплое дыхание.",
+      "speaker": "narrator",
+      "sfx": "breath"
+    },
+    {
+      "id": "s06",
+      "kind": "signal",
+      "duration": 4.6,
+      "voice": "«Лика? — спросил незнакомец. — Ты тоже слышишь ноль?»",
+      "speaker": "radio",
+      "sfx": "radio_voice"
+    },
+    {
+      "id": "s07",
+      "kind": "clock",
+      "duration": 3.0,
+      "voice": "Часы остановились на двух четырнадцати.",
+      "speaker": "narrator",
+      "sfx": "clock"
+    },
+    {
+      "id": "s08",
+      "kind": "ledger",
+      "duration": 5.4,
+      "voice": "В журнале дежурств появилась новая строка. Прямо у меня на глазах.",
+      "speaker": "narrator",
+      "sfx": "pencil"
+    },
+    {
+      "id": "s09",
+      "kind": "ledger",
+      "duration": 3.7,
+      "voice": "Моим почерком: «Слушатель номер два — Кир».",
+      "speaker": "narrator",
+      "sfx": "pencil"
+    },
+    {
+      "id": "s10",
+      "kind": "door",
+      "duration": 3.7,
+      "voice": "За стеной раздался первый удар. Потом второй.",
+      "speaker": "narrator",
+      "sfx": "knock"
+    },
+    {
+      "id": "s11",
+      "kind": "mirror",
+      "duration": 5.4,
+      "voice": "А в чёрном стекле телефонной будки кто-то стоял за моей спиной.",
+      "speaker": "narrator",
+      "sfx": "glass"
+    },
+    {
+      "id": "s12",
+      "kind": "final",
+      "duration": 5.4,
+      "voice": "«Не оборачивайся», — прошептал мой голос. Только теперь я ему поверила.",
+      "speaker": "radio",
+      "sfx": "sting"
+    }
+  ]
+}

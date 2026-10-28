@@ -1,0 +1,105 @@
+{
+  "series": "ЧАСТОТА НОЛЬ",
+  "episode": 7,
+  "title": "Без адресата",
+  "theme": "Нулевая частота",
+  "scenes": [
+    {
+      "id": "s01",
+      "kind": "cold_open",
+      "duration": 4.1,
+      "voice": "Я поняла правило: каждое предупреждение ищет нового слушателя.",
+      "speaker": "narrator",
+      "sfx": "radio_scan"
+    },
+    {
+      "id": "s02",
+      "kind": "ledger",
+      "duration": 5.0,
+      "voice": "В списке уже было семь имён. И ни одного свободного.",
+      "speaker": "narrator",
+      "sfx": "pencil"
+    },
+    {
+      "id": "s03",
+      "kind": "radio",
+      "duration": 5.0,
+      "voice": "«Отправь сигнал машине, — сказал Кир. — Машина не боится».",
+      "speaker": "kir",
+      "sfx": "radio_voice",
+      "tts_text": "«Отправь сигнал машине, — сказал Ки́р. — Машина не боится»."
+    },
+    {
+      "id": "s04",
+      "kind": "recorder",
+      "duration": 3.7,
+      "voice": "Я подключила магнитофон к передатчику вместо антенны.",
+      "speaker": "narrator",
+      "sfx": "tape"
+    },
+    {
+      "id": "s05",
+      "kind": "switch",
+      "duration": 3.0,
+      "voice": "Повернула рубильник. Вся станция вздрогнула.",
+      "speaker": "narrator",
+      "sfx": "switch"
+    },
+    {
+      "id": "s06",
+      "kind": "signal",
+      "duration": 5.0,
+      "voice": "Мой голос пошёл по кругу. Сначала шёпотом. Потом всё громче.",
+      "speaker": "radio",
+      "sfx": "radio_scan"
+    },
+    {
+      "id": "s07",
+      "kind": "clock",
+      "duration": 3.0,
+      "voice": "Часы снова показали две четырнадцать.",
+      "speaker": "narrator",
+      "sfx": "clock"
+    },
+    {
+      "id": "s08",
+      "kind": "station",
+      "duration": 3.7,
+      "voice": "Но двери, которые я запирала, оказались открытыми.",
+      "speaker": "narrator",
+      "sfx": "latch"
+    },
+    {
+      "id": "s09",
+      "kind": "archive",
+      "duration": 5.9,
+      "voice": "На магнитной ленте возникла первая запись. Та самая, которую я услышала вчера.",
+      "speaker": "narrator",
+      "sfx": "tape"
+    },
+    {
+      "id": "s10",
+      "kind": "mirror",
+      "duration": 6.3,
+      "voice": "В отражении я увидела себя возле приёмника. И поняла, кто говорил со мной.",
+      "speaker": "narrator",
+      "sfx": "glass"
+    },
+    {
+      "id": "s11",
+      "kind": "tomorrow",
+      "duration": 4.6,
+      "voice": "Сигнал шёл не в будущее. Он возвращался в прошлое.",
+      "speaker": "narrator",
+      "sfx": "beep"
+    },
+    {
+      "id": "s12",
+      "kind": "final",
+      "duration": 5.4,
+      "voice": "«Лика. У тебя сорок секунд», — произнесла я. И эфир замкнулся.",
+      "speaker": "radio",
+      "sfx": "sting"
+    }
+  ]
+}

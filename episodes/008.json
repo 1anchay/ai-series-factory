@@ -1,0 +1,105 @@
+{
+  "series": "ЧАСТОТА НОЛЬ",
+  "episode": 8,
+  "title": "Последний эфир",
+  "theme": "Нулевая частота",
+  "scenes": [
+    {
+      "id": "s01",
+      "kind": "cold_open",
+      "duration": 5.4,
+      "voice": "Если я замолчу, цепь оборвётся. Но вместе с ней исчезнет Кир.",
+      "speaker": "narrator",
+      "sfx": "radio_scan",
+      "tts_text": "Если я замолчу, цепь оборвётся. Но вместе с ней исчезнет Ки́р."
+    },
+    {
+      "id": "s02",
+      "kind": "receiver",
+      "duration": 5.4,
+      "voice": "«Не спасай меня», — сказал он. «Я умер двенадцать лет назад».",
+      "speaker": "kir",
+      "sfx": "radio_voice"
+    },
+    {
+      "id": "s03",
+      "kind": "clock",
+      "duration": 3.2,
+      "voice": "Впервые часы на станции пошли вперёд.",
+      "speaker": "narrator",
+      "sfx": "clock"
+    },
+    {
+      "id": "s04",
+      "kind": "archive",
+      "duration": 5.4,
+      "voice": "В архиве я нашла последний отчёт. Он был подписан моим именем.",
+      "speaker": "narrator",
+      "sfx": "paper"
+    },
+    {
+      "id": "s05",
+      "kind": "ledger",
+      "duration": 5.0,
+      "voice": "«Наблюдатель» — это не человек. Это память всех предупреждений сразу.",
+      "speaker": "narrator",
+      "sfx": "pencil"
+    },
+    {
+      "id": "s06",
+      "kind": "mirror",
+      "duration": 4.6,
+      "voice": "Я подошла к зеркалу. Отражение замерло, ожидая моего решения.",
+      "speaker": "narrator",
+      "sfx": "glass"
+    },
+    {
+      "id": "s07",
+      "kind": "switch",
+      "duration": 3.7,
+      "voice": "Я отключила громкоговоритель. Но оставила запись включённой.",
+      "speaker": "narrator",
+      "sfx": "switch"
+    },
+    {
+      "id": "s08",
+      "kind": "radio",
+      "duration": 5.0,
+      "voice": "Вместо нового предупреждения я сказала: «Никому не слушать этот эфир».",
+      "speaker": "radio",
+      "sfx": "radio_voice"
+    },
+    {
+      "id": "s09",
+      "kind": "signal",
+      "duration": 4.1,
+      "voice": "Все индикаторы погасли. Нулевая частота исчезла с экрана.",
+      "speaker": "narrator",
+      "sfx": "power"
+    },
+    {
+      "id": "s10",
+      "kind": "hall",
+      "duration": 3.7,
+      "voice": "В коридоре впервые стало тихо. Совсем тихо.",
+      "speaker": "narrator",
+      "sfx": "silence"
+    },
+    {
+      "id": "s11",
+      "kind": "door",
+      "duration": 3.7,
+      "voice": "Потом изнутри двери раздался один короткий стук.",
+      "speaker": "narrator",
+      "sfx": "knock"
+    },
+    {
+      "id": "s12",
+      "kind": "final",
+      "duration": 4.1,
+      "voice": "На табличке медленно проступили слова: «Станция номер десять».",
+      "speaker": "narrator",
+      "sfx": "sting"
+    }
+  ]
+}

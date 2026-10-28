@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import shutil
 import subprocess
 import tempfile
 from pathlib import Path
@@ -92,6 +93,10 @@ def main():
             # narration must be allowed to finish, with a small pause between shots
             durations.append(round(max(float(scene['duration']),len(wave)/SR+.56),2))
         audio=create_mix(scenes,durations,narration,tmp)
+        effects=tmp/'effects_only.wav'
+        if effects.exists():
+            shutil.copyfile(effects,target.with_name(target.stem+'_effects.wav'))
+
         scale=[]
         if args.width!=frame_w:
             scale=['-vf',f'scale={args.width}:{args.width*16//9}:flags=lanczos']

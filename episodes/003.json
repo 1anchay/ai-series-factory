@@ -1,0 +1,105 @@
+{
+  "series": "ЧАСТОТА НОЛЬ",
+  "episode": 3,
+  "title": "Три удара",
+  "theme": "Нулевая частота",
+  "scenes": [
+    {
+      "id": "s01",
+      "kind": "cold_open",
+      "duration": 4.6,
+      "voice": "Стук повторился. Три раза. Слишком ровно, будто по команде.",
+      "speaker": "narrator",
+      "sfx": "knock"
+    },
+    {
+      "id": "s02",
+      "kind": "door",
+      "duration": 5.0,
+      "voice": "Я подошла к служебной двери. На ней не было глазка.",
+      "speaker": "narrator",
+      "sfx": "footsteps"
+    },
+    {
+      "id": "s03",
+      "kind": "knocks",
+      "duration": 3.7,
+      "voice": "С той стороны кто-то тихо постучал снова.",
+      "speaker": "narrator",
+      "sfx": "knock"
+    },
+    {
+      "id": "s04",
+      "kind": "radio",
+      "duration": 3.7,
+      "voice": "Рация ожила: «Не открывай. Он не снаружи».",
+      "speaker": "radio",
+      "sfx": "radio_voice"
+    },
+    {
+      "id": "s05",
+      "kind": "hall",
+      "duration": 4.1,
+      "voice": "Но в коридоре никого не было. Даже тени.",
+      "speaker": "narrator",
+      "sfx": "wind"
+    },
+    {
+      "id": "s06",
+      "kind": "mirror",
+      "duration": 3.7,
+      "voice": "В отражении я увидела дверь. Распахнутую настежь.",
+      "speaker": "narrator",
+      "sfx": "glass"
+    },
+    {
+      "id": "s07",
+      "kind": "door",
+      "duration": 3.7,
+      "voice": "Настоящая дверь оставалась закрытой. Я проверила ручку.",
+      "speaker": "narrator",
+      "sfx": "latch"
+    },
+    {
+      "id": "s08",
+      "kind": "knocks",
+      "duration": 3.7,
+      "voice": "Изнутри раздались три удара. Изнутри самой комнаты.",
+      "speaker": "narrator",
+      "sfx": "knock"
+    },
+    {
+      "id": "s09",
+      "kind": "recorder",
+      "duration": 3.2,
+      "voice": "Магнитофон сам включился и записал их.",
+      "speaker": "narrator",
+      "sfx": "tape"
+    },
+    {
+      "id": "s10",
+      "kind": "ledger",
+      "duration": 4.6,
+      "voice": "На ленте обнаружилась надпись: «Не третий удар. Третий слушатель».",
+      "speaker": "narrator",
+      "sfx": "pencil"
+    },
+    {
+      "id": "s11",
+      "kind": "signal",
+      "duration": 5.0,
+      "voice": "Динамик произнёс чужим голосом: «Я — Кир. Я тебя нашёл».",
+      "speaker": "radio",
+      "sfx": "radio_voice",
+      "tts_text": "Динамик произнёс чужим голосом: «Я — Ки́р. Я тебя нашёл»."
+    },
+    {
+      "id": "s12",
+      "kind": "final",
+      "duration": 5.0,
+      "voice": "И под дверью медленно появилась тень человека. С моей стороны.",
+      "speaker": "narrator",
+      "sfx": "sting"
+    }
+  ]
+}

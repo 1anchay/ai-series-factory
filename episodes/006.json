@@ -1,0 +1,105 @@
+{
+  "series": "ЧАСТОТА НОЛЬ",
+  "episode": 6,
+  "title": "Секунда раньше",
+  "theme": "Нулевая частота",
+  "scenes": [
+    {
+      "id": "s01",
+      "kind": "cold_open",
+      "duration": 5.4,
+      "voice": "Я увидела себя в чёрном мониторе. Но отражение подняло руку первым.",
+      "speaker": "narrator",
+      "sfx": "glass"
+    },
+    {
+      "id": "s02",
+      "kind": "mirror",
+      "duration": 3.7,
+      "voice": "Через секунду моя рука сама повторила движение.",
+      "speaker": "narrator",
+      "sfx": "glass"
+    },
+    {
+      "id": "s03",
+      "kind": "clock",
+      "duration": 5.0,
+      "voice": "Я посмотрела на часы. Стрелка прыгнула назад. Ровно на секунду.",
+      "speaker": "narrator",
+      "sfx": "clock"
+    },
+    {
+      "id": "s04",
+      "kind": "hero",
+      "duration": 5.0,
+      "voice": "Значит, оно видит то, что я ещё не решила сделать.",
+      "speaker": "narrator",
+      "sfx": "breath"
+    },
+    {
+      "id": "s05",
+      "kind": "radio",
+      "duration": 5.0,
+      "voice": "Мой голос из радио сказал: «Не пытайся угадать следующий шаг».",
+      "speaker": "radio",
+      "sfx": "radio_voice"
+    },
+    {
+      "id": "s06",
+      "kind": "ledger",
+      "duration": 4.6,
+      "voice": "Я написала на листке два слова: «лево» и «право».",
+      "speaker": "narrator",
+      "sfx": "pencil"
+    },
+    {
+      "id": "s07",
+      "kind": "switch",
+      "duration": 4.1,
+      "voice": "Положила листок под перевёрнутый переключатель. И нажала наугад.",
+      "speaker": "narrator",
+      "sfx": "switch"
+    },
+    {
+      "id": "s08",
+      "kind": "mirror",
+      "duration": 3.0,
+      "voice": "В отражении человек впервые ошибся.",
+      "speaker": "narrator",
+      "sfx": "glass"
+    },
+    {
+      "id": "s09",
+      "kind": "warning",
+      "duration": 4.6,
+      "voice": "Красный индикатор мигнул пять раз. Раньше он мигал три.",
+      "speaker": "narrator",
+      "sfx": "alarm"
+    },
+    {
+      "id": "s10",
+      "kind": "door",
+      "duration": 4.1,
+      "voice": "За дверью послышались шаги. На этот раз настоящие.",
+      "speaker": "narrator",
+      "sfx": "footsteps"
+    },
+    {
+      "id": "s11",
+      "kind": "receiver",
+      "duration": 5.4,
+      "voice": "«Лика, — сказал Кир, — частота уже не предупреждает. Она выбирает».",
+      "speaker": "kir",
+      "sfx": "radio_voice",
+      "tts_text": "«Лика, — сказал Ки́р, — частота уже не предупреждает. Она выбирает»."
+    },
+    {
+      "id": "s12",
+      "kind": "final",
+      "duration": 4.6,
+      "voice": "А зеркало показало третьего человека. Он стоял между нами.",
+      "speaker": "narrator",
+      "sfx": "sting"
+    }
+  ]
+}

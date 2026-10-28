@@ -1,0 +1,108 @@
+{
+  "series": "ЧАСТОТА НОЛЬ",
+  "episode": 4,
+  "title": "Радист из прошлого",
+  "theme": "Нулевая частота",
+  "scenes": [
+    {
+      "id": "s01",
+      "kind": "cold_open",
+      "duration": 6.4,
+      "voice": "Человек по имени Кир говорил со мной по аппарату, у которого не было провода.",
+      "speaker": "narrator",
+      "sfx": "radio_scan",
+      "tts_text": "Человек по имени Ки́р говорил со мной по аппарату, у которого не было провода."
+    },
+    {
+      "id": "s02",
+      "kind": "receiver",
+      "duration": 4.1,
+      "voice": "«Я работал здесь», — сказал он. «До аварии».",
+      "speaker": "kir",
+      "sfx": "radio_voice"
+    },
+    {
+      "id": "s03",
+      "kind": "station",
+      "duration": 3.2,
+      "voice": "Но станцию закрыли двенадцать лет назад.",
+      "speaker": "narrator",
+      "sfx": "wind"
+    },
+    {
+      "id": "s04",
+      "kind": "clock",
+      "duration": 4.1,
+      "voice": "«Для меня это случилось сегодня», — ответил Кир.",
+      "speaker": "kir",
+      "sfx": "clock",
+      "tts_text": "«Для меня это случилось сегодня», — ответил Ки́р."
+    },
+    {
+      "id": "s05",
+      "kind": "radio",
+      "duration": 4.6,
+      "voice": "В наушниках щёлкнуло. Нулевая частота разделилась на два сигнала.",
+      "speaker": "narrator",
+      "sfx": "radio_scan"
+    },
+    {
+      "id": "s06",
+      "kind": "map",
+      "duration": 4.1,
+      "voice": "На карте загорелась точка, где стояла наша радиостанция.",
+      "speaker": "narrator",
+      "sfx": "beep"
+    },
+    {
+      "id": "s07",
+      "kind": "map",
+      "duration": 3.2,
+      "voice": "Рядом появилась вторая. Станция номер десять.",
+      "speaker": "narrator",
+      "sfx": "beep"
+    },
+    {
+      "id": "s08",
+      "kind": "hero",
+      "duration": 4.6,
+      "voice": "Я смотрела в окно. На этом месте был пустырь.",
+      "speaker": "narrator",
+      "sfx": "footsteps"
+    },
+    {
+      "id": "s09",
+      "kind": "signal",
+      "duration": 4.1,
+      "voice": "Кир произнёс: «Не ищи здание. Ищи его отражение».",
+      "speaker": "kir",
+      "sfx": "radio_voice",
+      "tts_text": "Ки́р произнёс: «Не ищи здание. Ищи его отражение»."
+    },
+    {
+      "id": "s10",
+      "kind": "mirror",
+      "duration": 4.6,
+      "voice": "Я подняла осколок зеркала. И увидела там другую башню.",
+      "speaker": "narrator",
+      "sfx": "glass"
+    },
+    {
+      "id": "s11",
+      "kind": "door",
+      "duration": 5.4,
+      "voice": "На её входе горел свет. И стояла табличка с моим именем.",
+      "speaker": "narrator",
+      "sfx": "latch"
+    },
+    {
+      "id": "s12",
+      "kind": "final",
+      "duration": 4.6,
+      "voice": "Кир вдруг закричал: «Выйди из эфира! Он уже рядом!»",
+      "speaker": "kir",
+      "sfx": "sting",
+      "tts_text": "Ки́р вдруг закричал: «Выйди из эфира! Он уже рядом!»"
+    }
+  ]
+}

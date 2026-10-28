@@ -30,16 +30,16 @@ def _convert(src,dst):
     return _wav(dst)
 
 
-async def _edge_run(text,dst,voice):
+async def _edge_run(text,dst,voice,rate='-7%'):
     import edge_tts
-    communicator=edge_tts.Communicate(text,voice,rate='-9%',volume='+0%')
+    communicator=edge_tts.Communicate(text,voice,rate=rate,volume='+0%')
     await communicator.save(str(dst))
 
 
-def _edge(text,tmp,idx,voice):
+def _edge(text,tmp,idx,voice,rate='-7%'):
     mp3=tmp/f'edge_{idx:02d}.mp3'
     wav=tmp/f'edge_{idx:02d}.wav'
-    asyncio.run(_edge_run(text,mp3,voice))
+    asyncio.run(_edge_run(text,mp3,voice,rate))
     return _convert(mp3,wav)
 
 
@@ -74,14 +74,19 @@ def synthesize(scenes,tmp,mode='auto',model_root=None):
     result=[]
     voice=os.environ.get('SERIES_EDGE_VOICE','ru-RU-SvetlanaNeural')
     for i,scene in enumerate(scenes):
-        text=scene['voice'].strip()
+        # Curated TTS wording can disambiguate stress without changing subtitles.
+        # Example: scene['tts_text'] can spell out dates or replace an ambiguous word.
+        text=scene.get('tts_text',scene['voice']).strip()
+        speaker=scene.get('speaker','narrator')
+        desired_voice='ru-RU-DmitryNeural' if speaker=='kir' else voice
+        rate='-10%' if speaker in ('radio','kir') else '-7%'
         if not text:raise RuntimeError(f'Empty narration in scene {i+1}')
         candidates={'auto':['edge','piper'],'edge':['edge'],'piper':['piper'],'espeak':['espeak']}[mode]
         errors=[]
         for name in candidates:
             try:
                 print(f'Narrating scene {i+1}/{len(scenes)} via {name}...',flush=True)
-                if name=='edge':audio=_edge(text,tmp,i,voice)
+                if name=='edge':audio=_edge(text,tmp,i,desired_voice,rate)
                 elif name=='piper':audio=_piper(text,tmp,i,model_root)
                 else:audio=_espeak(text,tmp,i)
                 rms=float(np.sqrt(np.mean(audio**2)))
@@ -89,7 +94,7 @@ def synthesize(scenes,tmp,mode='auto',model_root=None):
                 # Consistent perceived loudness without clipping; preserve natural dynamics.
                 gain=min(3., .15/max(rms,.0001))
                 audio=np.tanh(audio*gain*.87).astype(np.float32)
-                result.append((audio,name))
+                result.append((audio, name + ':' + (desired_voice if name=='edge' else 'local')))
                 break
             except Exception as exc:
                 errors.append(f'{name}: {exc}')
