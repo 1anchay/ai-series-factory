@@ -58,6 +58,7 @@ jobs:
           EPISODE: ${{ inputs.episode || '001' }}
         run: |
           python -m compileall -q studio2d
+          python studio2d/check_graphics.py
           python studio2d/validate.py --episode "episodes/${EPISODE}.json"
       - name: Render with Russian narration
         env:
