@@ -27,40 +27,46 @@ def chunks_for(text,limit=6):
 
 
 def subtitle(d,w,h,scene,t,voice_length):
-    # Each caption is an exact contiguous portion of the actual spoken transcript.
-    caption_chunks=chunks_for(scene['voice'])
-    elapsed=max(0,t-.16)
-    frac=min(.999,elapsed/max(.1,voice_length))
-    idx=min(len(caption_chunks)-1,int(frac*len(caption_chunks)))
-    text=caption_chunks[idx]
+    # Switch readable 1-2 line phrases proportional to spoken text length.
+    pieces=chunks_for(scene['voice'],limit=5)
+    timing=max(.15,voice_length)
+    elapsed=t-.18
+    if elapsed < 0 or elapsed >= timing+.12:
+        return Image.new('RGBA',(w,h),(0,0,0,0))
+    weights=[max(1,sum(len(word) for word in phrase.split())) for phrase in pieces]
+    full=sum(weights)
+    progress=min(1.,max(0.,elapsed/timing))*full
+    total=0;idx=len(pieces)-1
+    for i,weight in enumerate(weights):
+        total+=weight
+        if progress < total:
+            idx=i;break
+    text=pieces[idx]
     size=25
-    # Split into at most 2 lines, dynamically shrink for extreme long words.
     while size>=16:
         f=font(size)
-        words=text.split();lines=['']
-        for word in words:
+        lines=['']
+        for word in text.split():
             trial=(lines[-1]+' '+word).strip()
-            if f.getlength(trial)>w-45 and lines[-1]:lines.append(word)
+            if f.getlength(trial)>w-52 and lines[-1]:lines.append(word)
             else:lines[-1]=trial
         if len(lines)<=2:break
         size-=1
-    # Animated subtitle panel distinct from the artwork, always readable.
     box=Image.new('RGBA',(w,h),(0,0,0,0));bd=ImageDraw.Draw(box,'RGBA')
-    top=515 if len(lines)==2 else 530
-    bd.rounded_rectangle((12,top-23,w-12,612),radius=12,fill=(5,9,17,236),outline=(67,77,92,150),width=2)
-    bd.rectangle((24,top-16,29,top+len(lines)*34),fill=RED)
+    top=527 if len(lines)==2 else 546
+    bd.rounded_rectangle((12,top-25,w-12,min(614,top+len(lines)*34+9)),radius=12,
+                         fill=(5,9,17,222),outline=(74,85,105,135),width=2)
+    bd.rectangle((24,top-14,28,top+len(lines)*31),fill=RED)
     for j,line in enumerate(lines):
         width=f.getlength(line)
-        # Accent highlights final words on dramatic beats without changing the spoken words.
         bd.text(((w-width)/2,top+j*33),line,font=f,fill=CREAM)
     return box
 
-
-def draw_frame(scene,index,t,duration,voicelen,w,h):
+def draw_frame(scene,index,t,duration,voicelen,w,h,episode_num=1):
     # Source paintings contain actual animated geometry; never scale/zoom a still photo.
     im=render_art(scene['kind'],t,duration,index,w,h)
     d=ImageDraw.Draw(im)
-    hud(d,w,h,index,t)
+    hud(d,w,h,index,t,episode_num)
     if t>.12 and t<duration-.10:
         over=subtitle(d,w,h,scene,t,voicelen)
         im=Image.alpha_composite(im.convert('RGBA'),over).convert('RGB')
@@ -112,7 +118,7 @@ def main():
             for i,(scene,duration,(wave,engine)) in enumerate(zip(scenes,durations,narration)):
                 frames=round(duration*args.fps)
                 for j in range(frames):
-                    im=draw_frame(scene,i,j/args.fps,duration,len(wave)/SR,frame_w,frame_h)
+                    im=draw_frame(scene,i,j/args.fps,duration,len(wave)/SR,frame_w,frame_h,int(episode['episode']))
                     proc.stdin.write(im.tobytes())
                 print(f'  {i+1:02d}/{len(scenes)}: {scene["kind"]} [{duration:.1f}s, {engine}]',flush=True)
             proc.stdin.close();err=proc.stderr.read();rc=proc.wait()
