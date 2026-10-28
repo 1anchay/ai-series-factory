@@ -54,27 +54,36 @@ jobs:
           path: voice_models
           key: frequency-zero-irina-v1
       - name: Check script and episode
+        env:
+          EPISODE: ${{ inputs.episode || '001' }}
         run: |
           python -m compileall -q studio2d
-          python studio2d/validate.py --episode episodes/${{ inputs.episode }}.json
+          python studio2d/validate.py --episode "episodes/${EPISODE}.json"
       - name: Render with Russian narration
         env:
           SERIES_EDGE_VOICE: ru-RU-SvetlanaNeural
+          EPISODE: ${{ inputs.episode || '001' }}
+          TTS: ${{ inputs.tts || 'auto' }}
+          WIDTH: ${{ inputs.resolution || '720' }}
+          FPS: ${{ inputs.fps || '20' }}
         run: |
           python studio2d/render.py \
-            --episode episodes/${{ inputs.episode }}.json \
-            --output output/frequency_zero_${{ inputs.episode }}.mp4 \
-            --voice '${{ inputs.tts }}' \
-            --width '${{ inputs.resolution }}' \
-            --fps '${{ inputs.fps }}'
+            --episode "episodes/${EPISODE}.json" \
+            --output "output/frequency_zero_${EPISODE}.mp4" \
+            --voice "${TTS}" \
+            --width "${WIDTH}" \
+            --fps "${FPS}"
       - name: Verify dimensions and audio stream
+        env:
+          EPISODE: ${{ inputs.episode || '001' }}
+          WIDTH: ${{ inputs.resolution || '720' }}
         run: |
-          ffprobe -v error -show_entries stream=codec_type,width,height -of json output/frequency_zero_${{ inputs.episode }}.mp4 > output/verify.json
-          python studio2d/validate.py --video output/frequency_zero_${{ inputs.episode }}.mp4 --width '${{ inputs.resolution }}'
+          ffprobe -v error -show_entries stream=codec_type,width,height -of json "output/frequency_zero_${EPISODE}.mp4" > output/verify.json
+          python studio2d/validate.py --video "output/frequency_zero_${EPISODE}.mp4" --width "${WIDTH}"
       - name: Upload voiced episode
         uses: actions/upload-artifact@v4
         with:
-          name: frequency-zero-voiced-episode-${{ inputs.episode }}
+          name: frequency-zero-voiced-episode-${{ inputs.episode || '001' }}
           path: |
             output/*.mp4
             output/verify.json
