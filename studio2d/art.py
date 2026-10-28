@@ -5,6 +5,7 @@ from __future__ import annotations
 import math
 import random
 from PIL import Image, ImageDraw, ImageFont
+from atmosphere import background as cinematic_background, finish as cinematic_finish
 
 NAVY=(9,14,28); DEEP=(6,10,20); WALL=(22,30,46); WALL2=(29,40,55)
 RED=(235,73,84); REDD=(110,39,53); AMBER=(255,185,93); BLUE=(75,176,207)
@@ -376,14 +377,7 @@ def object_scene(im, kind, t, dur, index, rng_seed=12):
 
 
 def render(kind,t,duration,index,w=360,h=640):
-    im=background(w,h)
+    # Full composition on a consistent 2D stage; never zoom into a still image.
+    im=cinematic_background(w,h)
     object_scene(im,kind,t,duration,index)
-    # Low-cost animated dust, tiny texture lines, no scale-based camera motion
-    d=ImageDraw.Draw(im,'RGBA')
-    rand=random.Random(220+index)
-    for _ in range(24):
-        x=rand.randrange(w)
-        y=(rand.randrange(h)+int(t*(11+rand.randrange(16))))%h
-        alpha=35+rand.randrange(40)
-        d.ellipse((x,y,x+1,y+1),fill=(125,175,190,alpha))
-    return im
+    return cinematic_finish(im,kind,t,duration,index)
