@@ -37,6 +37,10 @@ def _sfx(name):
     if name=='printer':return [(k*.22,_noise(.085,.10,80+k,12)) for k in range(10)]
     if name=='tape':return [(.4,_noise(.27,.26,192,16)),(.78,_sine(155,.95,.12,2.5))]
     if name=='glitch':return [(.55,_noise(.6,.25,240,3.4)),(3.0,_sine(39,1.6,.25,1.1)),(4.6,_noise(.33,.18,241,12))]
+    if name=='low_rumble':return [(.2,_sine(44,2.8,.15,.58)),(1.6,_noise(.48,.10,332,3.2))]
+    if name=='wet_steps':return [(.85+i*.52,_noise(.14,.13,410+i,18)+_sine(114,.14,.08,11)) for i in range(5)]
+    if name=='metal':return [(.5,_sine(242,.9,.16,1.4)),(1.4,_noise(.35,.18,422,5))]
+    if name=='pulse':return [(.55,_sine(52,.38,.23,4.1)),(1.11,_sine(47,.42,.20,4.2)),(2.4,_sine(38,1.8,.12,.8))]
     return []
 
 def mix(scenes,durations,voice_arrays,temp):
