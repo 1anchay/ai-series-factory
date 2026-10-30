@@ -34,7 +34,7 @@ def main():
         cmd=['ffmpeg','-hide_banner','-loglevel','error','-y','-f','rawvideo','-pixel_format','rgb24',
              '-video_size','360x640','-framerate',str(a.fps),'-i','pipe:0','-i',str(audio),'-map','0:v','-map','1:a',
              '-vf',f'scale={a.width}:{a.width*16//9}:flags=lanczos', '-c:v','libx264','-preset','veryfast','-crf','21',
-             '-pix_fmt','yuv420p','-c:a','aac','-b:a','160k','-movflags','+faststart','-shortest',str(dest)]
+             '-pix_fmt','yuv420p','-c:a','aac','-b:a','160k','-af','loudnorm=I=-16:TP=-1.5:LRA=11', '-movflags','+faststart','-shortest',str(dest)]
         proc=subprocess.Popen(cmd,stdin=subprocess.PIPE,stderr=subprocess.PIPE)
         try:
             for i,(scene,duration,(samples,backend)) in enumerate(zip(shots,durations,spoken)):

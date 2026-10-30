@@ -198,8 +198,8 @@ def interior(kind):
         d.rectangle((127,160,229,237),fill=(72,58,49),outline=(108,90,71),width=4)
         for x,y,col in ((144,182,(217,203,163)),(186,182,(129,160,157)),(154,207,(180,115,106))):
             d.rectangle((x,y,x+26,y+22),fill=col)
-        sign(d,(127,104,230,126),'ВЫХОД',(160,219,190))
-        d.line((179,128,179,159),fill=(90,94,86),width=2)
+        sign(d,(127,74,230,96),'ВЫХОД',(160,219,190))
+        d.line((179,96,179,159),fill=(90,94,86),width=2)
         if kind in ('shelter','night','names'):
             # makeshift camp: crates, bags, old mattress, water bottles
             d.rectangle((12,453,71,502),fill=(94,73,56),outline=(124,97,69),width=3)

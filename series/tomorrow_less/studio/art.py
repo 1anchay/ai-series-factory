@@ -153,6 +153,10 @@ def draw(kind,t,duration,index,episode=1,scene=None):
         d.rectangle((283,308,306-gap,476),fill=(36,64,78),outline=(143,158,160),width=2)
         d.rectangle((306+gap,308,329,476),fill=(36,64,78),outline=(143,158,160),width=2)
         for x in [89,285]:d.ellipse((x,489,x+36,525),fill=(16,22,27))
+        # Small abandoned mitten on the empty front passenger seat.
+        d.ellipse((193,364,212,388),fill=(168,91,87))
+        d.rectangle((189,381,214,398),fill=(168,91,87))
+        d.ellipse((185,371,193,383),fill=(168,91,87))
         typ(d,(154,444),'МАРШРУТ 17',17,WHITE,anchor='mm')
     elif kind=='store':
         for x in (24,145,266):
@@ -168,6 +172,10 @@ def draw(kind,t,duration,index,episode=1,scene=None):
         for k in range(5):
             xx=177+((k*27+int(t*12))%114)
             d.line((xx,473,xx+12,473),fill=(91,105,106),width=3)
+        # Foreshadowing visible on screen: impossible checkout timestamp.
+        d.polygon([(208,414),(268,414),(273,468),(208,468)],fill=(227,214,183),outline=(139,126,98))
+        typ(d,(239,439),'04:40',17,(37,45,50),anchor='mm')
+
     elif kind=='phone':
         d.ellipse((130,460,240,485),fill=(18,18,22))
         d.rounded_rectangle((85,172,277,449),radius=23,fill=(13,19,24),outline=(73,100,115),width=8)
@@ -230,7 +238,8 @@ def draw(kind,t,duration,index,episode=1,scene=None):
         d.ellipse((81,152,279,350),fill=(51,58,67),outline=(131,131,124),width=8)
         d.ellipse((96,165,266,336),fill=(17,28,41))
         typ(d,(180,243),'04:40',40,RED if p>.55 else WHITE,anchor='mm')
-        d.line((180,251,181+math.sin(t*7)*56,300),fill=AMBER,width=3)
+        # The hand moves briefly, then stops exactly as the narration says.
+        d.line((180,251,181+math.sin(min(t,.55)*7)*56,300),fill=AMBER,width=3)
         d.rectangle((0,414,W,430),fill=(73,74,68) if p>.5 else (41,51,56))
     elif kind=='morning':
         survivors=[k for k in ORDER if k!='nika']

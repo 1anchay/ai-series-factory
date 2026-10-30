@@ -66,6 +66,7 @@ jobs:
           python series/tomorrow_less/studio/check_cast.py
           python series/tomorrow_less/studio/check_environment.py
           python series/tomorrow_less/studio/check_story.py
+          python series/tomorrow_less/studio/check_voice_routing.py
           python series/tomorrow_less/studio/export_characters.py --output output/character_sheet.png
       - name: Render fully narrated cinematic short
         env:

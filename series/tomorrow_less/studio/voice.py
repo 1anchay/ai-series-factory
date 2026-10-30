@@ -4,6 +4,7 @@ An episode is never released silently if a requested voice cannot be generated.
 from __future__ import annotations
 import asyncio
 import os
+import time
 import shutil
 import subprocess
 import urllib.request
@@ -43,10 +44,11 @@ def _edge(text,tmp,idx,voice,rate='-7%'):
     return _convert(mp3,wav)
 
 
-def _piper(text,tmp,idx,model_root):
-    name='ru_RU-irina-medium.onnx'
+def _piper(text,tmp,idx,model_root,speaker='narrator'):
+    model_voice='dmitri' if speaker in ('mark','gleb','timur','lev','kir') else 'irina'
+    name=f'ru_RU-{model_voice}-medium.onnx'
     model_root.mkdir(parents=True,exist_ok=True)
-    base='https://huggingface.co/rhasspy/piper-voices/resolve/main/ru/ru_RU/irina/medium/'
+    base=f'https://huggingface.co/rhasspy/piper-voices/resolve/main/ru/ru_RU/{model_voice}/medium/'
     for filename in [name,name+'.json']:
         target=model_root/filename
         if target.exists() and target.stat().st_size> (10_000_000 if filename==name else 100):continue
@@ -69,35 +71,48 @@ def _espeak(text,tmp,idx):
 
 
 def synthesize(scenes,tmp,mode='auto',model_root=None):
-    """Returns [(wave, backend)] and raises if any requested line is absent."""
+    """Return one coherent voice-engine mix, never random Edge/Piper switches per scene.
+
+    In auto mode, every line is attempted using Edge Neural with a small retry.
+    If any line fails, ALL lines are regenerated using local Piper (female Irina,
+    male Dmitri). eSpeak remains explicitly diagnostic only.
+    """
     model_root=Path(model_root or 'voice_models')
-    result=[]
-    voice=os.environ.get('SERIES_EDGE_VOICE','ru-RU-SvetlanaNeural')
-    for i,scene in enumerate(scenes):
-        # Curated TTS wording can disambiguate stress without changing subtitles.
-        # Example: scene['tts_text'] can spell out dates or replace an ambiguous word.
-        text=scene.get('tts_text',scene['voice']).strip()
-        speaker=scene.get('speaker','narrator')
-        desired_voice='ru-RU-DmitryNeural' if speaker in ('kir','mark','gleb','timur','lev') else voice
-        rate='-11%' if speaker in ('radio','kir','gleb') else ('-4%' if speaker=='nika' else '-7%')
-        if not text:raise RuntimeError(f'Empty narration in scene {i+1}')
-        candidates={'auto':['edge','piper'],'edge':['edge'],'piper':['piper'],'espeak':['espeak']}[mode]
-        errors=[]
-        for name in candidates:
-            try:
-                print(f'Narrating scene {i+1}/{len(scenes)} via {name}...',flush=True)
-                if name=='edge':audio=_edge(text,tmp,i,desired_voice,rate)
-                elif name=='piper':audio=_piper(text,tmp,i,model_root)
-                else:audio=_espeak(text,tmp,i)
-                rms=float(np.sqrt(np.mean(audio**2)))
-                if rms<.004:raise RuntimeError('Voice file is effectively silent')
-                # Consistent perceived loudness without clipping; preserve natural dynamics.
-                gain=min(3., .15/max(rms,.0001))
-                audio=np.tanh(audio*gain*.87).astype(np.float32)
-                result.append((audio, name + ':' + (desired_voice if name=='edge' else 'local')))
-                break
-            except Exception as exc:
-                errors.append(f'{name}: {exc}')
-        else:
-            raise RuntimeError('Failed to synthesize voice scene '+str(i+1)+'; '+' | '.join(errors))
-    return result
+    female=os.environ.get('SERIES_EDGE_VOICE','ru-RU-SvetlanaNeural')
+
+    def generate(backend):
+        voices=[]
+        for i,scene in enumerate(scenes):
+            txt=scene.get('tts_text',scene['voice']).strip()
+            if not txt:raise RuntimeError('Empty narration at scene '+str(i+1))
+            sp=scene.get('speaker','narrator')
+            male=sp in ('kir','mark','gleb','timur','lev')
+            remote='ru-RU-DmitryNeural' if male else female
+            rate='-11%' if sp in ('radio','kir','gleb') else ('-4%' if sp=='nika' else '-7%')
+            tries=3 if backend=='edge' else 1
+            last_error=None
+            for attempt in range(tries):
+                try:
+                    print(f'Voice {i+1}/{len(scenes)} {backend} attempt {attempt+1}',flush=True)
+                    if backend=='edge':samples=_edge(txt,tmp,i,remote,rate)
+                    elif backend=='piper':samples=_piper(txt,tmp,i,model_root,sp)
+                    elif backend=='espeak':samples=_espeak(txt,tmp,i)
+                    else:raise ValueError('Unknown voice engine: '+backend)
+                    rms=float(np.sqrt(np.mean(samples**2)))
+                    if rms<.004:raise RuntimeError('Synthesized speech is effectively silent')
+                    samples=np.tanh(samples*min(3.,.15/max(rms,.0001))*.87).astype(np.float32)
+                    voices.append((samples,backend+':' + (remote if backend=='edge' else ('male' if male else 'female'))))
+                    break
+                except Exception as err:
+                    last_error=err
+                    if attempt+1<tries:time.sleep(.8 * 2**attempt)
+            else:
+                raise RuntimeError(f'{backend} failed for scene {i+1}: {last_error}')
+        return voices
+
+    if mode!='auto':return generate(mode)
+    try:
+        return generate('edge')
+    except Exception as exc:
+        print('EDGE unavailable for whole episode; resynthesizing ALL lines via Piper: '+str(exc),flush=True)
+        return generate('piper')
