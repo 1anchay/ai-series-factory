@@ -85,6 +85,7 @@ jobs:
         run: |
           ffprobe -v error -show_entries format=duration,size -of json "output/zavtra_nas_menshe_${EPISODE}.mp4"
           ffprobe -v error -select_streams a -show_entries stream=codec_type -of csv=p=0 "output/zavtra_nas_menshe_${EPISODE}.mp4" | grep -q audio
+          ffprobe -v error -select_streams a -show_entries stream=sample_rate -of csv=p=0 "output/zavtra_nas_menshe_${EPISODE}.mp4" | grep -q 48000
           test -s "output/zavtra_nas_menshe_${EPISODE}.mp4"
       - uses: actions/upload-artifact@v4
         with:
