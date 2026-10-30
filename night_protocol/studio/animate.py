@@ -447,6 +447,7 @@ def render(args):
     else:
      sample=synth_piper(s['text'],target) if backend=='piper' else synth_edge(s['text'],target)
    elif args.tts=='edge':sample=synth_edge(s['text'],target)
+   elif args.tts=='piper':sample=synth_piper(s['text'],target)
    else:sample=synth_espeak(s['text'],target)
    voices.append(sample)
   print('Voice backend selected:',backend,flush=True)
@@ -478,6 +479,6 @@ def render(args):
  print('DONE',out,round(out.stat().st_size/1024/1024,2),'MB',flush=True)
 
 def main():
- p=argparse.ArgumentParser();p.add_argument('--episode',default=str(HERE/'episode.json'));p.add_argument('--output',default=str(HERE/'output'/'signal_underwater.mp4'));p.add_argument('--tts',choices=['neural','edge','espeak'],default='espeak')
+ p=argparse.ArgumentParser();p.add_argument('--episode',default=str(HERE/'episode.json'));p.add_argument('--output',default=str(HERE/'output'/'signal_underwater.mp4'));p.add_argument('--tts',choices=['piper','neural','edge','espeak'],default='espeak')
  args=p.parse_args();render(args)
 if __name__=='__main__':main()
