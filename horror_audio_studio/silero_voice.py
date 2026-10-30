@@ -26,7 +26,10 @@ class AidarVoice:
         # Silence/pauses should be driven through punctuation or explicit
         # sentence boundaries, not by distorting pitch after synthesis.
         with torch.inference_mode():
-            a=self.model.apply_tts(text=text,speaker="aidar",sample_rate=SR)
+            if scene.get("ssml_text"):
+                a=self.model.apply_tts(ssml_text=scene["ssml_text"],speaker="aidar",sample_rate=SR)
+            else:
+                a=self.model.apply_tts(text=text,speaker="aidar",sample_rate=SR)
         x=np.asarray(a.detach().cpu().numpy() if hasattr(a,"detach") else a,dtype=np.float32)
         if len(x)<SR//3 or not np.all(np.isfinite(x)):
             raise RuntimeError("Aidar returned empty or corrupt audio")
