@@ -9,6 +9,7 @@ PROJECT_ROOT=ROOT.parent
 sys.path.insert(0,str(Path(__file__).resolve().parent))
 from voice import synthesize,SR
 from v6_stage import present_frame
+from episode2_stage import render as episode2_frame
 from art import subtitle_panel,hud
 from sound import mix
 
@@ -25,6 +26,7 @@ def main():
     shots=doc['scenes']
     if not 8<=len(shots)<=24:raise ValueError('Only 8-24 meaningful shots per episode are supported')
     if doc.get('version','').startswith('6.') and len(shots)!=10:raise ValueError('v6 pilot must have exactly 10 purposeful scenes')
+    if doc.get('version','').startswith('7.') and len(shots)!=12:raise ValueError('v7 episode 2 must have 12 purposeful scenes')
     for s in shots:
         if not s.get('voice'):raise ValueError('No line to narrate in shot '+s.get('id','?'))
     dest=Path(a.output);dest.parent.mkdir(parents=True,exist_ok=True)
@@ -42,8 +44,11 @@ def main():
             for i,(scene,duration,(samples,backend)) in enumerate(zip(shots,durations,spoken)):
                 for frame in range(int(duration*a.fps)):
                     t=frame/a.fps
-                    im=present_frame(scene['kind'],t,duration,i,int(doc['episode']),scene)
-                    im=hud(im,scene['kind'],i,t,duration,int(doc['episode']))
+                    if int(doc['episode'])==2:
+                        im=episode2_frame(scene['kind'],t,duration,i,int(doc['episode']),scene)
+                    else:
+                        im=present_frame(scene['kind'],t,duration,i,int(doc['episode']),scene)
+                        im=hud(im,scene['kind'],i,t,duration,int(doc['episode']))
                     im=subtitle_panel(im,scene['voice'],t,len(samples)/SR)
                     proc.stdin.write(im.tobytes())
                 print(f'Shot {i+1:02d}/{len(shots)}: {scene["kind"]} {duration:.1f}s {backend}',flush=True)
