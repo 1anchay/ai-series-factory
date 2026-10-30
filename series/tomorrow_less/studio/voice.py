@@ -88,7 +88,7 @@ def synthesize(scenes,tmp,mode='auto',model_root=None):
             sp=scene.get('speaker','narrator')
             male=sp in ('kir','mark','gleb','timur','lev')
             remote='ru-RU-DmitryNeural' if male else female
-            rate='-11%' if sp in ('radio','kir','gleb') else ('-4%' if sp=='nika' else '-7%')
+            rate='-11%' if sp in ('radio','kir','gleb') else ('-4%' if sp=='nika' else '+8%')
             tries=3 if backend=='edge' else 1
             last_error=None
             for attempt in range(tries):

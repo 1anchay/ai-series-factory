@@ -5,16 +5,89 @@
   "version": "5.0",
   "target_seconds": 65,
   "scenes": [
-    {"id":"01","kind":"street","seconds":3.4,"speaker":"narrator","voice":"В то утро люди исчезли. Все сразу. Машины остались посреди дороги.","sfx":"wind"},
-    {"id":"02","kind":"bedroom","seconds":4.1,"speaker":"narrator","voice":"Я искала Соню. Её кровать была пуста, а телефон молчал.","sfx":"phone"},
-    {"id":"03","kind":"bus","seconds":3.2,"speaker":"narrator","voice":"На остановке стоял автобус. Двери открыты. Внутри никого.","sfx":"bus"},
-    {"id":"04","kind":"store","seconds":4.1,"speaker":"narrator","voice":"Магазин был пуст. Но касса печатала чеки. На каждом одно время: четыре сорок.","sfx":"printer"},
-    {"id":"05","kind":"meeting","seconds":3.4,"speaker":"narrator","voice":"К вечеру я нашла других выживших. Всего нас оказалось семеро.","sfx":"footsteps"},
-    {"id":"06","kind":"shelter","seconds":4.4,"speaker":"narrator","voice":"Мы укрылись в школе. Марк запер дверь. Ника снимала всё на камеру.","tts_text":"Мы укрылись в школе. Марк запер дверь. Ни́ка снимала всё на камеру.","sfx":"door"},
-    {"id":"07","kind":"names","seconds":3.9,"speaker":"narrator","voice":"Мы написали на доске семь имён. Чтобы утром никого не забыть.","sfx":"writing"},
-    {"id":"08","kind":"night","seconds":4.5,"speaker":"narrator","voice":"Ровно в четыре сорок свет погас. В коридоре прозвучали чужие шаги.","sfx":"power"},
-    {"id":"09","kind":"morning","seconds":4.5,"speaker":"narrator","voice":"Утром нас было шестеро. Но на доске по-прежнему семь имён. Никто не помнил Нику.","tts_text":"Утром нас было шестеро. Но на доске по-прежнему семь имён. Никто не помнил Ни́ку.","sfx":"count"},
-    {"id":"10","kind":"recording","seconds":5.3,"speaker":"narrator","voice":"Я нашла её камеру. На записи нас было семеро. А позади стоял кто-то восьмой.","sfx":"glitch"}
+    {
+      "id": "01",
+      "kind": "street",
+      "seconds": 3.4,
+      "speaker": "narrator",
+      "voice": "Утром исчезли все люди. Автобусы остались посреди дорог.",
+      "sfx": "wind"
+    },
+    {
+      "id": "02",
+      "kind": "bedroom",
+      "seconds": 4.1,
+      "speaker": "narrator",
+      "voice": "Я искала Соню. Её кровать пуста. Телефон молчит.",
+      "sfx": "phone"
+    },
+    {
+      "id": "03",
+      "kind": "bus",
+      "seconds": 3.2,
+      "speaker": "narrator",
+      "voice": "На остановке стоял автобус. Пустой. С открытыми дверями.",
+      "sfx": "bus"
+    },
+    {
+      "id": "04",
+      "kind": "store",
+      "seconds": 4.1,
+      "speaker": "narrator",
+      "voice": "В магазине касса сама печатала чеки. На всех — четыре сорок.",
+      "sfx": "printer"
+    },
+    {
+      "id": "05",
+      "kind": "meeting",
+      "seconds": 3.4,
+      "speaker": "narrator",
+      "voice": "К вечеру я нашла шестерых. Теперь нас семеро.",
+      "sfx": "footsteps"
+    },
+    {
+      "id": "06",
+      "kind": "shelter",
+      "seconds": 4.4,
+      "speaker": "narrator",
+      "voice": "Марк запер школу. Ника включила камеру. Мы остались.",
+      "sfx": "door",
+      "tts_text": "Марк запер школу. Ни́ка включила камеру. Мы остались."
+    },
+    {
+      "id": "07",
+      "kind": "names",
+      "seconds": 3.9,
+      "speaker": "narrator",
+      "voice": "На доске записали семь имён. Чтобы не забыть никого.",
+      "sfx": "writing"
+    },
+    {
+      "id": "08",
+      "kind": "night",
+      "seconds": 4.5,
+      "speaker": "narrator",
+      "voice": "В четыре сорок погас свет. За дверью кто-то прошёл.",
+      "sfx": "power"
+    },
+    {
+      "id": "09",
+      "kind": "morning",
+      "seconds": 4.5,
+      "speaker": "narrator",
+      "voice": "Утром нас шестеро. На доске семь имён. Нику никто не помнит.",
+      "sfx": "count",
+      "tts_text": "Утром нас шестеро. На доске семь имён. Ни́ку никто не помнит."
+    },
+    {
+      "id": "10",
+      "kind": "recording",
+      "seconds": 5.3,
+      "speaker": "narrator",
+      "voice": "Я нашла камеру Ники. На записи нас семеро. А позади стоит восьмой человек.",
+      "sfx": "glitch",
+      "tts_text": "Я нашла камеру Ни́ки. На записи нас семеро. А позади стоит восьмой человек."
+    }
   ],
   "tagline": "Семь выживших. Шесть воспоминаний. Восемь силуэтов."
 }
