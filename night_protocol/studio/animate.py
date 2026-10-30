@@ -341,6 +341,38 @@ def synth_edge(text,path,voice='ru-RU-SvetlanaNeural'):
   raw=wf.readframes(wf.getnframes())
  return np.frombuffer(raw,dtype='<i2').astype(np.float32)/32768
 
+def synth_piper(text,path):
+ """Offline Russian neural TTS using the Piper Irina model."""
+ import urllib.request
+ model_dir=HERE/'voice_models';model_dir.mkdir(parents=True,exist_ok=True)
+ root='https://huggingface.co/rhasspy/piper-voices/resolve/main/ru/ru_RU/irina/medium/'
+ basename='ru_RU-irina-medium.onnx'
+ for name in (basename,basename+'.json'):
+  target=model_dir/name
+  if not target.exists() or target.stat().st_size<(100000 if name.endswith('.onnx') else 100):
+   urllib.request.urlretrieve(root+name+'?download=true',target)
+ if not shutil.which('piper'):
+  raise RuntimeError('Piper CLI not installed')
+ result=subprocess.run(['piper','--model',str(model_dir/basename),'--output_file',str(path)],
+                       input=text+'\n',text=True,capture_output=True,timeout=150)
+ if result.returncode or not path.exists():
+  raise RuntimeError('Piper synthesis failed: '+result.stderr[-500:])
+ with wave.open(str(path)) as wf:
+  rate=wf.getframerate();channels=wf.getnchannels();raw=wf.readframes(wf.getnframes())
+ audio=np.frombuffer(raw,dtype='<i2').astype(np.float32)/32768
+ if channels>1:audio=audio.reshape(-1,channels).mean(axis=1)
+ if rate!=SR:
+  audio=np.interp(np.arange(round(len(audio)*SR/rate))/SR,np.arange(len(audio))/rate,audio).astype(np.float32)
+ return audio
+
+
+def synth_neural(text,path):
+ try:return synth_edge(text,path)
+ except Exception as exc:
+  print('Edge unavailable; trying Piper:',str(exc)[-200:],flush=True)
+  return synth_piper(text,path)
+
+
 def effects(kind,seed,dur):
  r=np.random.default_rng(seed);n=int(SR*dur);t=np.arange(n,dtype=np.float32)/SR
  s=.013*r.standard_normal(n).astype(np.float32)
@@ -399,7 +431,7 @@ def render(args):
  doc=json.loads(Path(args.episode).read_text(encoding='utf-8'));shots=doc['scenes'];out=Path(args.output);out.parent.mkdir(parents=True,exist_ok=True)
  with tempfile.TemporaryDirectory() as temp:
   tmp=Path(temp)
-  voices=[(synth_edge(s['text'],tmp/f'{i:02d}.wav') if args.tts=='edge' else synth_espeak(s['text'],tmp/f'{i:02d}.wav')) for i,s in enumerate(shots)]
+  voices=[(synth_neural(s['text'],tmp/f'{i:02d}.wav') if args.tts=='neural' else synth_edge(s['text'],tmp/f'{i:02d}.wav') if args.tts=='edge' else synth_espeak(s['text'],tmp/f'{i:02d}.wav')) for i,s in enumerate(shots)]
   durations=[]
   for s,v in zip(shots,voices):
    durations.append(math.ceil(max(3.6,len(v)/SR+.85)*FPS)/FPS)
@@ -428,6 +460,6 @@ def render(args):
  print('DONE',out,round(out.stat().st_size/1024/1024,2),'MB',flush=True)
 
 def main():
- p=argparse.ArgumentParser();p.add_argument('--episode',default=str(HERE/'episode.json'));p.add_argument('--output',default=str(HERE/'output'/'signal_underwater.mp4'));p.add_argument('--tts',choices=['edge','espeak'],default='espeak')
+ p=argparse.ArgumentParser();p.add_argument('--episode',default=str(HERE/'episode.json'));p.add_argument('--output',default=str(HERE/'output'/'signal_underwater.mp4'));p.add_argument('--tts',choices=['neural','edge','espeak'],default='espeak')
  args=p.parse_args();render(args)
 if __name__=='__main__':main()
