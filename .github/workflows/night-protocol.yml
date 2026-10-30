@@ -27,7 +27,7 @@ jobs:
           python night_protocol/studio/animate.py \
             --episode night_protocol/episode.json \
             --output night_protocol/output/signal_underwater_neural.mp4 \
-            --tts edge
+            --tts neural
       - name: Verify video AND audio
         run: |
           ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 night_protocol/output/signal_underwater_neural.mp4
