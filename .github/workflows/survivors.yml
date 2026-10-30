@@ -1,4 +1,4 @@
-name: Завтра нас меньше — режиссёрский пилот v6
+name: Завтра нас меньше — серии 001 и 002
 on:
   push:
     branches: [main]
@@ -10,9 +10,9 @@ on:
       episode:
         description: Available produced episode
         required: true
-        default: '001'
+        default: '002'
         type: choice
-        options: ['001']
+        options: ['001', '002']
       voice:
         description: Russian narrator (keep main Svetlana)
         required: true
@@ -61,8 +61,10 @@ jobs:
           python series/tomorrow_less/studio/check_cast.py
           python series/tomorrow_less/studio/check_environment.py
           python series/tomorrow_less/studio/check_voice_routing.py
-      - name: Validate v6 continuity and animated actions
-        run: python series/tomorrow_less/studio/check_v6.py
+      - name: Validate v6 pilot and v7 episode 2
+        run: |
+          python series/tomorrow_less/studio/check_v6.py
+          python series/tomorrow_less/studio/check_episode2.py
       - name: Export tangible illustration assets
         run: |
           python series/tomorrow_less/studio/props.py output/props
@@ -71,7 +73,7 @@ jobs:
           test -s output/props/register.png
       - name: Narrate and render episode
         env:
-          EPISODE: ${{ inputs.episode || '001' }}
+          EPISODE: ${{ inputs.episode || '002' }}
           TTS: ${{ inputs.voice || 'auto' }}
           WIDTH: ${{ inputs.width || '720' }}
           FPS: ${{ inputs.fps || '20' }}
@@ -82,14 +84,14 @@ jobs:
             --voice "$TTS" --width "$WIDTH" --fps "$FPS"
       - name: Assert audio and video
         env:
-          EPISODE: ${{ inputs.episode || '001' }}
+          EPISODE: ${{ inputs.episode || '002' }}
         run: |
           ffprobe -v error -show_entries format=duration,size -of json "output/zavtra_nas_menshe_${EPISODE}.mp4"
           ffprobe -v error -select_streams a -show_entries stream=codec_type -of csv=p=0 "output/zavtra_nas_menshe_${EPISODE}.mp4" | grep -q audio
           test -s "output/zavtra_nas_menshe_${EPISODE}.mp4"
       - uses: actions/upload-artifact@v4
         with:
-          name: zavtra-nas-menshe-v6-${{ inputs.episode || '001' }}
+          name: zavtra-nas-menshe-${{ inputs.episode || '002' }}
           path: |
             output/*.mp4
             output/props/*.png
