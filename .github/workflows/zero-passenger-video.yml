@@ -1,0 +1,72 @@
+name: Zero Passenger — full voiced episode
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/zero-passenger-video.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  produce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Prepare video and voice dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -qq -y ffmpeg
+          python -m pip install -r zero_passenger/requirements.txt
+          python -m pip install -r horror_audio_studio/requirements.txt
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Check source and scene count
+        run: |
+          python -m py_compile zero_passenger/studio/*.py
+          python - <<'PY'
+          import json
+          p='zero_passenger/episodes/001.json'
+          e=json.load(open(p,encoding='utf-8'))
+          a=json.load(open('zero_passenger/episodes/001_audio.json',encoding='utf-8'))
+          assert len(e['scenes'])==len(a['scenes'])==15
+          assert all(x['id']==y['id'] for x,y in zip(e['scenes'],a['scenes']))
+          print('15 correctly matched scenes')
+          PY
+      - name: Produce Aidar voice with correct scene timings
+        run: |
+          python horror_audio_studio/produce.py \
+            --episode zero_passenger/episodes/001_audio.json \
+            --voice silero-aidar --mode full \
+            --output zero_passenger/production_audio
+      - name: Render full animation with original score, events, captions and narrator
+        run: |
+          python zero_passenger/studio/render.py \
+            --episode zero_passenger/episodes/001.json \
+            --cue zero_passenger/production_audio/cue_sheet.json \
+            --narration zero_passenger/production_audio/narration.mp3 \
+            --output zero_passenger/output/episode_001.mp4 --fps 24 --quick
+      - name: Validate final video
+        run: |
+          python - <<'PY'
+          import json, subprocess
+          p='zero_passenger/output/episode_001.mp4'
+          raw=subprocess.check_output(['ffprobe','-v','error','-show_streams','-show_format','-of','json',p])
+          d=json.loads(raw)
+          video=next(x for x in d['streams'] if x['codec_type']=='video')
+          assert video['width']==576 and video['height']==1024
+          assert any(x['codec_type']=='audio' for x in d['streams'])
+          assert float(d['format']['duration'])>65
+          print('VALID: 9:16, full speech, duration=',d['format']['duration'])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zero-passenger-pilot-fully-voiced
+          path: |
+            zero_passenger/output/episode_001.mp4
+            zero_passenger/production_audio/narration.mp3
+            zero_passenger/production_audio/cue_sheet.json
+          retention-days: 14
+          if-no-files-found: error
