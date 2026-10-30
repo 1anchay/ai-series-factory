@@ -160,11 +160,16 @@ def flashlight():
     return im
 
 BUILDERS={'bus':bus,'camera':camcorder,'register':register,'shelves':shelves,'child_drawing':drawing,'school_door':school_door,'flashlight':flashlight}
+ASSET_ROOT=Path(__file__).resolve().parents[1] / 'assets' / 'props'
+
+def artwork(name):
+    path=ASSET_ROOT/(name+'.png')
+    return Image.open(path).convert('RGBA') if path.is_file() else BUILDERS[name]()
 
 @lru_cache(maxsize=32)
 def sprite(name, width, height):
     if name not in BUILDERS:raise KeyError(name)
-    return BUILDERS[name]().resize((int(width),int(height)),Image.Resampling.LANCZOS)
+    return artwork(name).resize((int(width),int(height)),Image.Resampling.LANCZOS)
 
 def paste_prop(scene_image, name, xy, size, opacity=255):
     obj=sprite(name,*size)
@@ -177,7 +182,7 @@ def paste_prop(scene_image, name, xy, size, opacity=255):
 def export(directory):
     target=Path(directory);target.mkdir(parents=True,exist_ok=True)
     for name,maker in BUILDERS.items():
-        img=maker();img.save(target/(name+'.png'))
+        img=artwork(name);img.save(target/(name+'.png'))
     return sorted(target.glob('*.png'))
 
 if __name__=='__main__':
