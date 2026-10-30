@@ -34,7 +34,7 @@ def main():
  cmd=['ffmpeg','-hide_banner','-loglevel','error','-y','-f','rawvideo','-pixel_format','rgb24',
       '-video_size',f'{W}x{H}','-framerate',str(fps),'-i','pipe:0','-i',str(wav),'-map','0:v','-map','1:a',
       '-c:v','libx264','-preset','veryfast' if args.quick else 'medium','-crf','22','-pix_fmt','yuv420p',
-      '-c:a','aac','-b:a','160k','-movflags','+faststart','-shortest',str(output)]
+      '-c:a','aac','-b:a','160k','-af','loudnorm=I=-16:TP=-1.5:LRA=10','-movflags','+faststart','-shortest',str(output)]
  proc=subprocess.Popen(cmd,stdin=subprocess.PIPE,stderr=subprocess.PIPE)
  try:
   for i,(s,c) in enumerate(zip(scenes,cues)):
