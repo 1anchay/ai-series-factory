@@ -431,7 +431,25 @@ def render(args):
  doc=json.loads(Path(args.episode).read_text(encoding='utf-8'));shots=doc['scenes'];out=Path(args.output);out.parent.mkdir(parents=True,exist_ok=True)
  with tempfile.TemporaryDirectory() as temp:
   tmp=Path(temp)
-  voices=[(synth_neural(s['text'],tmp/f'{i:02d}.wav') if args.tts=='neural' else synth_edge(s['text'],tmp/f'{i:02d}.wav') if args.tts=='edge' else synth_espeak(s['text'],tmp/f'{i:02d}.wav')) for i,s in enumerate(shots)]
+  voices=[]
+  backend=args.tts
+  for i,s in enumerate(shots):
+   target=tmp/f'{i:02d}.wav'
+   if args.tts=='neural':
+    if i==0:
+     try:
+      sample=synth_edge(s['text'],target)
+      backend='edge'
+     except Exception as exc:
+      print('Edge unavailable; using Piper for ALL scenes:',str(exc)[-220:],flush=True)
+      sample=synth_piper(s['text'],target)
+      backend='piper'
+    else:
+     sample=synth_piper(s['text'],target) if backend=='piper' else synth_edge(s['text'],target)
+   elif args.tts=='edge':sample=synth_edge(s['text'],target)
+   else:sample=synth_espeak(s['text'],target)
+   voices.append(sample)
+  print('Voice backend selected:',backend,flush=True)
   durations=[]
   for s,v in zip(shots,voices):
    durations.append(math.ceil(max(3.6,len(v)/SR+.85)*FPS)/FPS)
