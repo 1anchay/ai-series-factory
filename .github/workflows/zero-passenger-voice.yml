@@ -1,0 +1,52 @@
+name: Zero Passenger 001 — Aidar narration
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'zero_passenger/episodes/**'
+      - '.github/workflows/zero-passenger-voice.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audio:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install offline Russian voice and original foley engine
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -qq -y ffmpeg
+          python -m pip install -r horror_audio_studio/requirements.txt
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Narrate pilot with selected Aidar only
+        run: |
+          python horror_audio_studio/produce.py \
+            --episode zero_passenger/episodes/001_audio.json \
+            --voice silero-aidar \
+            --mode full \
+            --output zero_passenger/production_audio
+      - name: Validate narration integrity
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('zero_passenger/production_audio')
+          a=json.loads((p/'cue_sheet.json').read_text())
+          assert len(a)==15
+          assert all(item['voice_seconds']>1.5 for item in a)
+          assert a[-1]['end']>=65
+          for name in ['master','music','foley','narration']:
+              assert (p/(name+'.mp3')).stat().st_size>10000
+          print('Voice validated. Duration',a[-1]['end'])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zero-passenger-aidar-episode-001
+          path: zero_passenger/production_audio/*
+          retention-days: 14
+          if-no-files-found: error
