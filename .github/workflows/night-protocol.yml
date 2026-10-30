@@ -1,0 +1,41 @@
+name: Night Protocol — build original motion short
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'night_protocol/**'
+      - '.github/workflows/night-protocol.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  production:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -qq -y ffmpeg fonts-dejavu-core
+          python -m pip install -r night_protocol/requirements.txt
+      - name: Render with Russian neural narration
+        run: |
+          python night_protocol/studio/animate.py \
+            --episode night_protocol/episode.json \
+            --output night_protocol/output/signal_underwater_neural.mp4 \
+            --tts edge
+      - name: Verify video AND audio
+        run: |
+          ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 night_protocol/output/signal_underwater_neural.mp4
+          ffprobe -v error -select_streams a:0 -show_entries stream=codec_name -of csv=p=0 night_protocol/output/signal_underwater_neural.mp4 | grep -q aac
+          test $(stat -c%s night_protocol/output/signal_underwater_neural.mp4) -gt 500000
+      - uses: actions/upload-artifact@v4
+        with:
+          name: night-protocol-neural-ru
+          path: night_protocol/output/signal_underwater_neural.mp4
+          if-no-files-found: error
+          retention-days: 7
