@@ -10,10 +10,9 @@ on:
       narrator:
         description: Russian neural narrator
         type: choice
-        default: 'ru-RU-DmitryNeural'
+        default: 'silero-aidar'
         options:
-          - 'ru-RU-DmitryNeural'
-          - 'ru-RU-SvetlanaNeural'
+          - 'silero-aidar'
 permissions:
   contents: read
 jobs:
@@ -30,9 +29,10 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq ffmpeg
           python -m pip install -r horror_audio_studio/requirements.txt
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
       - name: Narrate and mix the original soundtrack
         env:
-          NARRATOR: ${{ inputs.narrator || 'ru-RU-DmitryNeural' }}
+          NARRATOR: ${{ inputs.narrator || 'silero-aidar' }}
         run: |
           python horror_audio_studio/produce.py \
             --episode horror_audio_studio/episode.json \
@@ -57,7 +57,7 @@ jobs:
           PY
       - uses: actions/upload-artifact@v4
         with:
-          name: seventh-lamp-ru-voice
+          name: seventh-lamp-silero-aidar-director
           path: horror_audio_studio/output/*
           if-no-files-found: error
           retention-days: 14
