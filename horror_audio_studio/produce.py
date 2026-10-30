@@ -221,7 +221,13 @@ def mix_episode(doc, mode, outdir,voice='ru-RU-DmitryNeural',rate='-8%',pitch='-
         # The entire episode uses ONE voice engine. If online Edge fails, all
         # lines are re-rendered with free local Piper Dmitri / Irina.
         speech=[]
-        if mode=='full':
+        if mode=='full' and voice=='silero-aidar':
+            from silero_voice import AidarVoice
+            aidar=AidarVoice()  # loaded once per entire episode
+            for scene in scenes:
+                speech.append(aidar.speak(scene,output_rate=SR))
+            engine='Silero-Aidar-v5.6'
+        elif mode=='full':
             try:
                 print('Trying Edge neural voice:',voice,flush=True)
                 for i,scene in enumerate(scenes):
@@ -254,7 +260,7 @@ def mix_episode(doc, mode, outdir,voice='ru-RU-DmitryNeural',rate='-8%',pitch='-
         cue=[];cursor=0
         for i,(scene,seconds,y) in enumerate(zip(scenes,durations,narration)):
             cue.append(dict(id=scene['id'],at=round(cursor,2),end=round(cursor+seconds,2),
-                            narration=scene['text'],visual=scene['visual'],sfx=scene['sfx'],voice_seconds=round(len(y)/SR,2)))
+                            narration=scene['text'],tts_text=scene.get('tts_text',scene['text']),visual=scene['visual'],sfx=scene['sfx'],voice_seconds=round(len(y)/SR,2)))
             events=scene.get('sfx',[])
             for j,name in enumerate(events):
                 position=cursor+(0.25 if j==0 else min(2.2,seconds*.36))
@@ -304,7 +310,7 @@ def main():
     p=argparse.ArgumentParser()
     p.add_argument('--episode',default=str(HERE/'episode.json'))
     p.add_argument('--mode',choices=['full','music-only'],default='full')
-    p.add_argument('--voice',default='ru-RU-DmitryNeural')
+    p.add_argument('--voice',default='silero-aidar')
     p.add_argument('--rate',default='-8%')
     p.add_argument('--pitch',default='-8Hz')
     p.add_argument('--output',default=str(HERE/'output'))
