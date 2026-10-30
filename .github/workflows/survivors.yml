@@ -60,12 +60,14 @@ jobs:
         run: |
           python -m compileall -q series/tomorrow_less/studio
           test -f "series/tomorrow_less/episodes/${EPISODE}.json"
-          python -c 'import json,os; p="series/tomorrow_less/episodes/"+os.environ["EPISODE"]+".json"; e=json.load(open(p,encoding="utf-8")); assert len(e["scenes"])==17'
+          python -c 'import json,os; p="series/tomorrow_less/episodes/"+os.environ["EPISODE"]+".json"; e=json.load(open(p,encoding="utf-8")); assert len(e["scenes"])==18'
       - name: Check consistent character identities
         run: |
           python series/tomorrow_less/studio/check_cast.py
+          python series/tomorrow_less/studio/check_environment.py
+          python series/tomorrow_less/studio/check_story.py
           python series/tomorrow_less/studio/export_characters.py --output output/character_sheet.png
-      - name: Render fully narrated short
+      - name: Render fully narrated cinematic short
         env:
           EPISODE: ${{ inputs.episode || '001' }}
           TTS: ${{ inputs.voice || 'auto' }}

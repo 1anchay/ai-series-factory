@@ -78,8 +78,8 @@ def synthesize(scenes,tmp,mode='auto',model_root=None):
         # Example: scene['tts_text'] can spell out dates or replace an ambiguous word.
         text=scene.get('tts_text',scene['voice']).strip()
         speaker=scene.get('speaker','narrator')
-        desired_voice='ru-RU-DmitryNeural' if speaker=='kir' else voice
-        rate='-10%' if speaker in ('radio','kir') else '-7%'
+        desired_voice='ru-RU-DmitryNeural' if speaker in ('kir','mark','gleb','timur','lev') else voice
+        rate='-11%' if speaker in ('radio','kir','gleb') else ('-4%' if speaker=='nika' else '-7%')
         if not text:raise RuntimeError(f'Empty narration in scene {i+1}')
         candidates={'auto':['edge','piper'],'edge':['edge'],'piper':['piper'],'espeak':['espeak']}[mode]
         errors=[]

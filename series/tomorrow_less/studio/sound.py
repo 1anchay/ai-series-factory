@@ -34,16 +34,23 @@ def _sfx(name):
     if name=='clock':return [(i*.62,_noise(.055,.12,100+i,24)) for i in range(5)]
     if name=='count':return [(.9,_sine(55,.9,.21,3)),(1.8,_noise(.3,.11,95,6))]
     if name=='reveal':return [(1.4,_sine(53,1.7,.20,1.1)),(3.5,_knock())]
+    if name=='printer':return [(k*.22,_noise(.085,.10,80+k,12)) for k in range(10)]
+    if name=='tape':return [(.4,_noise(.27,.26,192,16)),(.78,_sine(155,.95,.12,2.5))]
+    if name=='glitch':return [(.55,_noise(.6,.25,240,3.4)),(3.0,_sine(39,1.6,.25,1.1)),(4.6,_noise(.33,.18,241,12))]
     return []
 
 def mix(scenes,durations,voice_arrays,temp):
     n=int(sum(durations)*SR);t=np.arange(n,dtype=np.float32)/SR
-    amb=np.column_stack([np.sin(2*np.pi*(41*t+.13*np.sin(t*.13)))*.009,
-                         np.sin(2*np.pi*(43*t+.16*np.sin(t*.11)))*.009]).astype(np.float32)
+    # An original three-tone score with ebbing suspense (never a continuous beep).
+    pulse=(.60+.40*np.sin(2*np.pi*.017*t-0.3))
+    ambient_chord=(.015*np.sin(2*np.pi*(43*t+.13*np.sin(t*.13)))
+                   +.006*np.sin(2*np.pi*65.41*t)
+                   +.004*np.sin(2*np.pi*87.31*t))*pulse
+    amb=np.column_stack([ambient_chord,ambient_chord*.92]).astype(np.float32)
     rng=np.random.default_rng(350)
     for ch in range(2):
         r=rng.standard_normal(n).astype(np.float32)
-        amb[:,ch]+=(r-.84*np.roll(r,1))*.004
+        amb[:,ch]+=(r-.84*np.roll(r,1))*.007
     foley=np.zeros((n,2),dtype=np.float32);voice=np.zeros((n,2),dtype=np.float32)
     def add(buf,a,at,gain=.7,pan=0):
         start=int(at*SR);length=min(len(a),n-start)
@@ -62,7 +69,9 @@ def mix(scenes,durations,voice_arrays,temp):
     duck[dialogue_mask]=.56
     # smooth volume between voiced/nonvoiced regions without pumping
     for shift in [240,720,1440]:duck=np.minimum(duck,np.roll(duck,shift));duck=np.minimum(duck,np.roll(duck,-shift))
-    mixdata=voice+foley*.75+amb*duck[:,None]
+    # Foley is not ducked as much as ambience: the story must sound physical.
+    mixdata=voice+foley*.95+amb*duck[:,None]
+    mixdata=np.tanh(mixdata*.98).astype(np.float32)
     peak=float(np.max(np.abs(mixdata)))
     if peak>.95:mixdata*=.95/peak
     fade=min(int(.24*SR),len(mixdata)//8)

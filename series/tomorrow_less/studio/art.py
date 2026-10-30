@@ -5,6 +5,7 @@ import random, math
 from functools import lru_cache
 from characters import CAST, ORDER, person, portrait_card, label
 from environment import environment as stage_environment
+from cinema import finish as cinematic_finish
 
 W,H=360,640
 C_BG=(13,20,32); C_WALL=(25,35,48); C_FLOOR=(18,29,38)
@@ -124,6 +125,11 @@ def draw(kind,t,duration,index,episode=1,scene=None):
         d.rounded_rectangle((126,371,181,446),radius=8,fill=(18,29,37),outline=(55,130,148),width=3)
         typ(d,(153,407),'07:12',12,WHITE,anchor='mm')
         d.ellipse((180,410,188,418),fill=(231,101,101))
+        # Daughter's missing photo is the emotional stake, not random dressing.
+        d.rectangle((244,170,314,246),fill=(104,87,65),outline=(178,148,103),width=4)
+        d.ellipse((262,183,283,204),fill=(214,165,135))
+        d.polygon([(256,227),(272,205),(290,228)],fill=(180,131,95))
+        typ(d,(280,237),'СОНЯ',8,WHITE,anchor='mm')
     elif kind=='street':
         for x,y in [(44,470),(194,490)]:
             d.rounded_rectangle((x,y,x+112,y+44),radius=8,fill=(55,65,76),outline=(84,94,105),width=3)
@@ -142,6 +148,10 @@ def draw(kind,t,duration,index,episode=1,scene=None):
         opened=22*abs(math.sin(t*1.5))
         d.line((304-opened,309,304-opened,477),fill=(160,177,174),width=5)
         d.ellipse((54,459,78,486),fill=(215,193,102) if int(t*1.2)%2==0 else (104,104,86))
+        # Mechanical door panels visibly slide apart instead of a static empty bus.
+        gap=round(3+15*ease(abs(math.sin(t*1.15))))
+        d.rectangle((283,308,306-gap,476),fill=(36,64,78),outline=(143,158,160),width=2)
+        d.rectangle((306+gap,308,329,476),fill=(36,64,78),outline=(143,158,160),width=2)
         for x in [89,285]:d.ellipse((x,489,x+36,525),fill=(16,22,27))
         typ(d,(154,444),'МАРШРУТ 17',17,WHITE,anchor='mm')
     elif kind=='store':
@@ -154,6 +164,10 @@ def draw(kind,t,duration,index,episode=1,scene=None):
         d.rectangle((213,430,267,439),fill=(195,198,164) if int(t*3)%7 else (35,39,44))
         d.rectangle((12,78,348,86),fill=AMBER if int(t*3)%7 else (100,105,87))
         typ(d,(180,116),'МАГАЗИН 24/7',17,WHITE,anchor='mm')
+        # Unattended conveyor still ticks forward.
+        for k in range(5):
+            xx=177+((k*27+int(t*12))%114)
+            d.line((xx,473,xx+12,473),fill=(91,105,106),width=3)
     elif kind=='phone':
         d.ellipse((130,460,240,485),fill=(18,18,22))
         d.rounded_rectangle((85,172,277,449),radius=23,fill=(13,19,24),outline=(73,100,115),width=8)
@@ -175,6 +189,9 @@ def draw(kind,t,duration,index,episode=1,scene=None):
         d.rounded_rectangle((16,119,344,216),radius=13,fill=(20,32,45),outline=(76,90,102),width=3)
         cast(d,180,374,7,t)
         typ(d,(180,161),'МЫ НАШЛИ ДРУГ ДРУГА',19,WHITE,anchor='mm')
+        # Warm portable lamp adds continuity between evening scenes.
+        d.ellipse((166,550,194,562),fill=(44,37,26))
+        d.ellipse((173,540,187,552),fill=AMBER)
         typ(d,(180,194),'НАС СЕМЕРО',23,AMBER,anchor='mm')
     elif kind=='introductions':
         keys=(scene or {}).get('characters',['asya','mark'])
@@ -221,6 +238,24 @@ def draw(kind,t,duration,index,episode=1,scene=None):
             xx=12+(j%3)*114; yy=140+(j//3)*184
             portrait_card(im,key,(xx,yy,xx+108,yy+177),phase=t+j*.15)
         typ(d,(180,111),'ИХ ОСТАЛОСЬ ШЕСТЕРО',19,RED,anchor='mm')
+    elif kind=='recording':
+        # Physical proof survives the memory wipe: Nika's video camera.
+        d.rounded_rectangle((35,123,327,502),radius=19,fill=(11,17,26),outline=(106,121,129),width=9)
+        d.rounded_rectangle((53,145,308,440),radius=9,fill=(25,40,54),outline=(47,78,92),width=3)
+        d.rectangle((59,152,302,435),outline=(75,92,99),width=2)
+        d.rectangle((76,300,275,336),fill=(31,47,61))
+        d.line((152,155,152,435),fill=(55,69,76),width=2)
+        # On the recording, Nika is present despite everyone forgetting her.
+        person(d,153+2*math.sin(t*2),382,'nika',1.28,t,'idle')
+        typ(d,(77,163),'REC',15,RED)
+        if int(t*2)%2==0:d.ellipse((123,167,134,178),fill=RED)
+        typ(d,(274,163),'04:39',14,WHITE,anchor='ra')
+        d.rectangle((68,452,296,480),fill=(26,33,44),outline=(86,92,99),width=2)
+        typ(d,(182,465),'ЗАПИСЬ СОХРАНЕНА',13,AMBER,anchor='mm')
+        if p>.72:
+            # The unexpected figure beyond the camera's visible area.
+            d.ellipse((258,241,282,266),fill=(10,16,23))
+            d.polygon([(255,260),(285,260),(302,340),(245,340)],fill=(9,14,22))
     elif kind=='reveal':
         wall_names(d,52,132,7,True)
         d.rounded_rectangle((81,468,280,524),radius=7,fill=(49,52,55))
@@ -240,7 +275,7 @@ def draw(kind,t,duration,index,episode=1,scene=None):
         d.ellipse((x,y,x+1,y+1),fill=(72,87,93))
     if kind in ('store','clock','night') and int(t*12)%30==0:
         d.rectangle((0,82,W,85),fill=(175,142,99))
-    return im
+    return cinematic_finish(im,kind,t,index)
 
 def subtitle_panel(im,fulltext,t,voice_duration):
     # Max two lines. Words are displayed in consecutive chunks of the actual narration.
@@ -276,7 +311,7 @@ def hud(im,kind,index,t,duration,episode=1):
     d=ImageDraw.Draw(im)
     d.rounded_rectangle((12,12,348,65),radius=9,fill=(8,15,25),outline=(44,61,78),width=2)
     typ(d,(23,19),'ЗАВТРА НАС МЕНЬШЕ',15,WHITE)
-    count=6 if kind in ('morning','reveal') else 7
+    count=6 if kind in ('morning','reveal','recording') else 7
     typ(d,(23,45),f'ДЕНЬ {2 if count==6 else 1:02d}',11,DIM)
     typ(d,(337,44),f'ОСТАЛОСЬ {count:02d}',12,RED if count<7 else AMBER,anchor='ra')
     return im

@@ -5,7 +5,7 @@ from art import draw
 from environment import base_scene,environment
 
 KINDS=['cold_open','bedroom','street','bus','store','phone','shadow','meeting',
-       'introductions','shelter','names','night','clock','morning','reveal']
+       'introductions','shelter','names','night','clock','morning','reveal','recording']
 
 def run():
     for i,k in enumerate(KINDS):

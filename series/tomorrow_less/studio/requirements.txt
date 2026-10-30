@@ -1,4 +1,4 @@
 Pillow>=10.4,<13
 numpy>=1.26,<3
-edge-tts>=7,<8
+edge-tts>=6.1,<9
 piper-tts>=1.3,<2
