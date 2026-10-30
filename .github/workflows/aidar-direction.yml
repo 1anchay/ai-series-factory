@@ -1,0 +1,40 @@
+name: Aidar voice direction — stress and acting
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'horror_audio_studio/aidar_direction.py'
+      - '.github/workflows/aidar-direction.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  cast:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install offline voice engine
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+          python -m pip install numpy
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Create four Aidar voice direction variants
+        run: python horror_audio_studio/aidar_direction.py
+      - name: Verify voice takes
+        run: |
+          set -euo pipefail
+          test "$(find horror_audio_studio/aidar_directed_tests -name '*.mp3' | wc -l)" -eq 4
+          for p in horror_audio_studio/aidar_directed_tests/*.mp3; do
+            ffprobe -v error -show_entries format=duration -of csv=p=0 "$p"
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aidar-natural-stress-and-intonation
+          path: horror_audio_studio/aidar_directed_tests/*
+          retention-days: 14
+          if-no-files-found: error
