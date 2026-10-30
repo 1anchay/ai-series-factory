@@ -3,7 +3,7 @@
 No sounds, melodies or voice recordings copied from the user's reference.
 """
 from __future__ import annotations
-import argparse, json, math, subprocess, tempfile, time, wave
+import argparse, json, math, subprocess, tempfile, time, wave, shutil, urllib.request
 from pathlib import Path
 import numpy as np
 from scipy.signal import butter, sosfilt, fftconvolve
@@ -42,6 +42,29 @@ def voice_line(txt, path, voice, rate, pitch):
         lo=max(0,mask[0]-round(.08*SR)); hi=min(len(x),mask[-1]+round(.15*SR))
         x=x[lo:hi]
     if len(x)==0:raise RuntimeError('Empty voice clip after synthesis')
+    return x
+
+def piper_voice(txt,path,female=False):
+    """Consistent free offline neural fallback. No voice cloning."""
+    name='irina' if female else 'dmitri'
+    model_dir=HERE/'voice_models';model_dir.mkdir(exist_ok=True)
+    base=f'https://huggingface.co/rhasspy/piper-voices/resolve/main/ru/ru_RU/{name}/medium/'
+    filename=f'ru_RU-{name}-medium.onnx'
+    for part in (filename,filename+'.json'):
+        dest=model_dir/part
+        minimum=10_000_000 if part==filename else 100
+        if not dest.exists() or dest.stat().st_size<minimum:
+            print('Download Piper model:',part,flush=True)
+            request=urllib.request.Request(base+part+'?download=true',headers={'User-Agent':'HorrorAudioStudio/1.0'})
+            with urllib.request.urlopen(request,timeout=120) as r, dest.open('wb') as f:
+                shutil.copyfileobj(r,f)
+            if dest.stat().st_size<minimum:raise RuntimeError('Downloaded Piper model is incomplete')
+    raw=path.with_name(path.stem+'_raw.wav')
+    p=subprocess.run(['piper','--model',str(model_dir/filename),'--output_file',str(raw)],input=txt+'\n',text=True,capture_output=True,timeout=180)
+    if p.returncode or not raw.exists():raise RuntimeError('Piper failed: '+p.stderr[-1000:])
+    call('ffmpeg','-hide_banner','-loglevel','error','-y','-i',str(raw),'-ar',str(SR),'-ac','1','-c:a','pcm_s16le',str(path))
+    x=read_wav(path)
+    if len(x)<SR//2:raise RuntimeError('Piper returned empty or very short speech')
     return x
 
 def highpass(x, cutoff=75):return sosfilt(butter(2,cutoff,btype='highpass',fs=SR,output='sos'),x).astype(np.float32)
@@ -195,16 +218,29 @@ def mix_episode(doc, mode, outdir,voice='ru-RU-DmitryNeural',rate='-8%',pitch='-
     with tempfile.TemporaryDirectory() as d:
         tmp=Path(d)
         narration=[];durations=[]
-        for i,s in enumerate(scenes):
-            if mode=='full':
-                y=voice_line(s['text'],tmp/f'voice_{i:02d}.wav',voice,rate,pitch)
-                y=master_voice(y,s.get('role','narrator'))
-            else:
-                # Timing-only bed (not a fake or placeholder speech track).
-                y=np.zeros(0,dtype=np.float32)
-            duration=max(s['min_seconds'],len(y)/SR+.7)
+        # The entire episode uses ONE voice engine. If online Edge fails, all
+        # lines are re-rendered with free local Piper Dmitri / Irina.
+        speech=[]
+        if mode=='full':
+            try:
+                print('Trying Edge neural voice:',voice,flush=True)
+                for i,scene in enumerate(scenes):
+                    speech.append(voice_line(scene['text'],tmp/f'voice_{i:02d}.wav',voice,rate,pitch))
+                engine='Edge'
+            except Exception as exc:
+                print('Edge unavailable; resynthesizing all lines with offline Piper:',str(exc)[-260:],flush=True)
+                speech=[]
+                female=('Svetlana' in voice or 'Irina' in voice)
+                for i,scene in enumerate(scenes):
+                    speech.append(piper_voice(scene['text'],tmp/f'piper_{i:02d}.wav',female=female))
+                engine='Piper'
+        else:
+            engine='none'
+        for i,scene in enumerate(scenes):
+            y=master_voice(speech[i],scene.get('role','narrator')) if mode=='full' else np.zeros(0,dtype=np.float32)
+            duration=max(scene['min_seconds'],len(y)/SR+.7)
             narration.append(y);durations.append(duration)
-            print(f"scene {i+1:02d}: {duration:.2f}s voice {len(y)/SR:.2f}s",flush=True)
+            print(f"scene {i+1:02d}: {duration:.2f}s voice {len(y)/SR:.2f}s backend={engine}",flush=True)
         duration=sum(durations)+.35
         n=round(duration*SR)
         music=make_music(duration) * 1.9
