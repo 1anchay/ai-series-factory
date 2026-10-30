@@ -250,6 +250,11 @@ def mix_episode(doc, mode, outdir,voice='ru-RU-DmitryNeural',rate='-8%',pitch='-
         duration=sum(durations)+.35
         n=round(duration*SR)
         music=make_music(duration) * 1.9
+        # np.arange-based score synthesis can differ by one sample from round().
+        # Align every stem exactly before stereo mixing.
+        if len(music)<n:
+            music=np.pad(music,((0,n-len(music)),(0,0)))
+        music=music[:n]
         foley=np.zeros((n,2),dtype=np.float32)
         voices=np.zeros((n,2),dtype=np.float32)
         duck=np.ones(n,dtype=np.float32)
