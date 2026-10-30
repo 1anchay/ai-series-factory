@@ -85,7 +85,8 @@
         "steps_three"
       ],
       "visual": "Звуковая волна с тремя ударными пиками",
-      "tts_text": "Но микрофон записывал шаг+и. Один. Два. Три."
+      "tts_text": "Но микрофон записывал шаг+и. Один. Два. Три.",
+      "ssml_text": "<speak>Но микрофон записывал шаг+и.<break time=\"260ms\"/>Один.<break time=\"220ms\"/>Два.<break time=\"220ms\"/>Три.</speak>"
     },
     {
       "id": "08",
@@ -108,7 +109,8 @@
         "radio_noise"
       ],
       "visual": "Слова домофона выделяются красным, звуковая волна",
-      "tts_text": "Не считай шаг+и. Оно сл+ышит."
+      "tts_text": "Не считай шаг+и. Оно сл+ышит.",
+      "ssml_text": "<speak><prosody rate=\"slow\">Не считай шаг+и.</prosody><break time=\"380ms\"/><prosody pitch=\"low\">Оно сл+ышит.</prosody></speak>"
     },
     {
       "id": "10",
@@ -131,7 +133,8 @@
         "silence"
       ],
       "visual": "Движение дверцы кухонного шкафа, три удара",
-      "tts_text": "И тут три удара раздались не за дв+ерью. А у меня на к+ухне."
+      "tts_text": "И тут три удара раздались не за дв+ерью. А у меня на к+ухне.",
+      "ssml_text": "<speak>И тут три удара раздались не за дв+ерью.<break time=\"320ms\"/><prosody rate=\"slow\">А у меня на к+ухне.</prosody></speak>"
     },
     {
       "id": "12",
@@ -163,7 +166,8 @@
       "sfx": [
         "sub_hit"
       ],
-      "visual": "Появляется лишний этаж 07 на схеме"
+      "visual": "Появляется лишний этаж 07 на схеме",
+      "ssml_text": "<speak>Но я уже был дома.<break time=\"250ms\"/><prosody rate=\"slow\">А в нашем доме всего шесть этажей.</prosody></speak>"
     },
     {
       "id": "15",
@@ -175,9 +179,11 @@
         "final_hit"
       ],
       "visual": "Система отмечает несуществующий этаж 07; резкий обрыв",
-      "tts_text": "Я снова посмотрел на к+амеры. На экране горело: «Седьмой этаж. Движение обнаружено!»"
+      "tts_text": "Я снова посмотрел на к+амеры. На экране горело: «Седьмой этаж. Движение обнаружено!»",
+      "ssml_text": "<speak>Я снова посмотрел на к+амеры.<break time=\"250ms\"/>На экране горело:<break time=\"320ms\"/><prosody rate=\"slow\">Седьмой этаж. Движение обнаружено.</prosody></speak>"
     }
   ],
   "voice_profile": "silero-aidar-v5.6",
-  "pronunciation_notes": "Editing tts_text changes pronunciation, not captions. Use + BEFORE stressed vowel."
+  "pronunciation_notes": "Editing tts_text changes pronunciation, not captions. Use + BEFORE stressed vowel.",
+  "direction_notes": "Aidar is the only full-episode narrator. TTS stress and SSML are independent of the caption text. Read/listen to audit."
 }
