@@ -261,21 +261,21 @@ def present_frame(kind,t,duration,index,episode=1,scene=None):
         d.rounded_rectangle((32,175,329,464),radius=6,fill=(25,50,63),outline=(82,112,123),width=3)
         d.rectangle((46,190,315,453),outline=(50,83,99),width=2)
         # miniature distant figures with distinct coat colours and faces
-        coords=[(66,360),(105,361),(145,362),(185,363),(225,364),(265,365),(300,366)]
+        coords=[(48,360),(81,361),(114,362),(147,363),(180,364),(213,365),(246,366)]
         for i,who in enumerate(ORDER):
             x,y=coords[i]
             person(d,x,y,who,.48,t,'idle')
         # sinister EIGHTH: silhouette behind the group, clearly isolated and taller
-        xx=278;yy=243
+        xx=295;yy=243
         d.ellipse((xx-12,yy-23,xx+12,yy+1),fill=(8,13,22))
         d.polygon([(xx-19,yy),(xx+19,yy),(xx+29,yy+79),(xx-30,yy+79)],fill=(8,13,22))
         d.line((xx-12,yy+72,xx-14,yy+118),fill=(7,11,21),width=8)
         d.line((xx+12,yy+72,xx+14,yy+118),fill=(7,11,21),width=8)
         d.ellipse((xx-10,yy-14,xx-6,yy-11),fill=RED)
         d.ellipse((xx+5,yy-14,xx+9,yy-11),fill=RED)
-        d.line((278,211,278,315),fill=RED,width=2)
+        d.line((295,211,295,315),fill=RED,width=2)
         if t>duration*.60:
-            d.arc((246,196,311,327),25,325,fill=RED,width=4)
+            d.arc((262,196,331,327),25,325,fill=RED,width=4)
         text(d,(57,184),'● REC',16,RED)
         text(d,(313,186),'04:39',12,PAPER,'ra')
         text(d,(180,487),'СЕМЕРО + КТО-ТО ЕЩЁ',15,AMBER,'mm')
