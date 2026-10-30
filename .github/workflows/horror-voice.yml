@@ -1,0 +1,63 @@
+name: Horror studio — original narrated short
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'horror_audio_studio/**'
+      - '.github/workflows/horror-voice.yml'
+  workflow_dispatch:
+    inputs:
+      narrator:
+        description: Russian neural narrator
+        type: choice
+        default: 'ru-RU-DmitryNeural'
+        options:
+          - 'ru-RU-DmitryNeural'
+          - 'ru-RU-SvetlanaNeural'
+permissions:
+  contents: read
+jobs:
+  render-audio:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+          python -m pip install -r horror_audio_studio/requirements.txt
+      - name: Narrate and mix the original soundtrack
+        env:
+          NARRATOR: ${{ inputs.narrator || 'ru-RU-DmitryNeural' }}
+        run: |
+          python horror_audio_studio/produce.py \
+            --episode horror_audio_studio/episode.json \
+            --voice "$NARRATOR" \
+            --mode full \
+            --output horror_audio_studio/output
+      - name: Verify duration, loudness and audio
+        run: |
+          set -euo pipefail
+          for s in master narration music foley; do
+            test -s "horror_audio_studio/output/${s}.mp3"
+            ffprobe -v error -select_streams a:0 -show_entries stream=codec_name -of csv=p=0 "horror_audio_studio/output/${s}.mp3" | grep -q mp3
+          done
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          cue=json.loads(Path('horror_audio_studio/output/cue_sheet.json').read_text(encoding='utf8'))
+          assert len(cue)==15
+          assert cue[-1]['end'] >= 80
+          assert all(c['voice_seconds']>1 for c in cue)
+          print('Narration verified for all 15 scenes; duration',cue[-1]['end'])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: seventh-lamp-ru-voice
+          path: horror_audio_studio/output/*
+          if-no-files-found: error
+          retention-days: 14
