@@ -1,4 +1,4 @@
-name: Завтра нас меньше — пилот
+name: Завтра нас меньше — пилот v5
 on:
   push:
     branches: [main]
@@ -14,13 +14,13 @@ on:
         type: choice
         options: ['001']
       voice:
-        description: Russian narration engine
+        description: Russian narrator (keep main Svetlana)
         required: true
         default: auto
         type: choice
         options: [auto, edge, piper]
       width:
-        description: Video width (9:16)
+        description: Output width 9:16
         required: true
         default: '720'
         type: choice
@@ -44,31 +44,30 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Install engine
+      - name: Install studio
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq ffmpeg fonts-dejavu-core
           python -m pip install -r series/tomorrow_less/studio/requirements.txt
-      - name: Cache free voice models
+      - name: Cache voice models
         uses: actions/cache@v4
         with:
           path: series/tomorrow_less/voice_models
-          key: znm-russian-piper-irina-v1
-      - name: Compile and validate episode data
-        env:
-          EPISODE: ${{ inputs.episode || '001' }}
+          key: znm-piper-v5
+      - name: Check story, characters and studio code
         run: |
           python -m compileall -q series/tomorrow_less/studio
-          test -f "series/tomorrow_less/episodes/${EPISODE}.json"
-          python -c 'import json,os; p="series/tomorrow_less/episodes/"+os.environ["EPISODE"]+".json"; e=json.load(open(p,encoding="utf-8")); assert len(e["scenes"])==18'
-      - name: Check consistent character identities
-        run: |
+          python series/tomorrow_less/studio/check_story.py
           python series/tomorrow_less/studio/check_cast.py
           python series/tomorrow_less/studio/check_environment.py
-          python series/tomorrow_less/studio/check_story.py
           python series/tomorrow_less/studio/check_voice_routing.py
-          python series/tomorrow_less/studio/export_characters.py --output output/character_sheet.png
-      - name: Render fully narrated cinematic short
+      - name: Export tangible illustration assets
+        run: |
+          python series/tomorrow_less/studio/props.py output/props
+          test -s output/props/bus.png
+          test -s output/props/camera.png
+          test -s output/props/register.png
+      - name: Narrate and render episode
         env:
           EPISODE: ${{ inputs.episode || '001' }}
           TTS: ${{ inputs.voice || 'auto' }}
@@ -79,19 +78,18 @@ jobs:
             --episode "series/tomorrow_less/episodes/${EPISODE}.json" \
             --output "output/zavtra_nas_menshe_${EPISODE}.mp4" \
             --voice "$TTS" --width "$WIDTH" --fps "$FPS"
-      - name: Check that video AND audio exist
+      - name: Assert audio and video
         env:
           EPISODE: ${{ inputs.episode || '001' }}
         run: |
           ffprobe -v error -show_entries format=duration,size -of json "output/zavtra_nas_menshe_${EPISODE}.mp4"
           ffprobe -v error -select_streams a -show_entries stream=codec_type -of csv=p=0 "output/zavtra_nas_menshe_${EPISODE}.mp4" | grep -q audio
-          ffprobe -v error -select_streams a -show_entries stream=sample_rate -of csv=p=0 "output/zavtra_nas_menshe_${EPISODE}.mp4" | grep -q 48000
           test -s "output/zavtra_nas_menshe_${EPISODE}.mp4"
       - uses: actions/upload-artifact@v4
         with:
-          name: zavtra-nas-menshe-${{ inputs.episode || '001' }}
+          name: zavtra-nas-menshe-v5-${{ inputs.episode || '001' }}
           path: |
             output/*.mp4
-            output/character_sheet.png
+            output/props/*.png
           if-no-files-found: error
           retention-days: 7

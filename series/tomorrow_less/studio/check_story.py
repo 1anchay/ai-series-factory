@@ -1,18 +1,16 @@
-"""Narrative continuity and editorial quality checks for season 1 pilot."""
-from __future__ import annotations
+"""Editorial continuity checks: a fast 10-shot pilot, no introductions montage."""
 import json
 from pathlib import Path
-
 root=Path(__file__).resolve().parents[1]
 e=json.loads((root/'episodes/001.json').read_text(encoding='utf-8'))
 scenes=e['scenes']
-assert len(scenes)==18, f'Expected 18 shots; found {len(scenes)}'
-assert len({s['id'] for s in scenes})==len(scenes)
-assert scenes[0]['kind']=='cold_open' and scenes[-1]['kind']=='recording'
-assert [s['kind'] for s in scenes].count('introductions')==3
-assert 'Соне' in next(s['voice'] for s in scenes if s['id']=='02')
-assert 'четыре сорок' in next(s['voice'] for s in scenes if s['id']=='11')
-assert 'Ни́ка' in next(s.get('tts_text','') for s in scenes if s['id']=='08b')
-assert all(s.get('voice') and s.get('seconds',0)>=2 for s in scenes)
-assert scenes[-1].get('sfx')=='glitch'
-print('Narrative QA passed:',len(scenes),'shots, human stakes, foreshadowing and twist')
+expected=['street','bedroom','bus','store','meeting','shelter','names','night','morning','recording']
+assert [s['kind'] for s in scenes]==expected
+assert len({s['id'] for s in scenes})==len(scenes)==10
+assert all(s.get('voice') and s.get('sfx') and s.get('seconds',0)>2 for s in scenes)
+assert 'Соню' in scenes[1]['voice']
+assert 'четыре сорок' in scenes[3]['voice'] and 'четыре сорок' in scenes[7]['voice']
+assert 'семеро' in scenes[4]['voice'] and 'шестеро' in scenes[8]['voice']
+assert 'восьмой' in scenes[-1]['voice']
+assert all(s['kind']!='introductions' for s in scenes)
+print('QA PASS: ten meaningful shots; missing child, 04:40, seven-six-eight, no parade of characters')

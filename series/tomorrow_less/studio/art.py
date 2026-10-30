@@ -6,6 +6,7 @@ from functools import lru_cache
 from characters import CAST, ORDER, person, portrait_card, label
 from environment import environment as stage_environment
 from cinema import finish as cinematic_finish
+from props import paste_prop
 
 W,H=360,640
 C_BG=(13,20,32); C_WALL=(25,35,48); C_FLOOR=(18,29,38)
@@ -284,6 +285,28 @@ def draw(kind,t,duration,index,episode=1,scene=None):
         d.ellipse((x,y,x+1,y+1),fill=(72,87,93))
     if kind in ('store','clock','night') and int(t*12)%30==0:
         d.rectangle((0,82,W,85),fill=(175,142,99))
+    # The props are independent high-resolution illustrations. They are not
+    # crops of a storyboard, so each shot remains a coherent full-frame scene.
+    if kind=='bus':
+        im=paste_prop(im,'bus',(9,257),(344,265))
+    elif kind=='street':
+        im=paste_prop(im,'bus',(202,355),(147,112))
+    elif kind=='bedroom':
+        im=paste_prop(im,'child_drawing',(239,174),(72,89))
+    elif kind=='store':
+        im=paste_prop(im,'shelves',(9,144),(147,328))
+        im=paste_prop(im,'register',(153,393),(180,125))
+    elif kind=='shelter':
+        im=paste_prop(im,'school_door',(254,157),(100,256))
+        im=paste_prop(im,'flashlight',(244,443),(81,59))
+    elif kind=='night':
+        im=paste_prop(im,'school_door',(236,132),(114,304))
+    elif kind=='recording':
+        # Establish the physical camcorder, then reveal Nika's impossible footage.
+        if t<1.05:
+            im=paste_prop(im,'camera',(33,231),(292,230))
+        else:
+            im=paste_prop(im,'camera',(21,431),(127,84))
     return cinematic_finish(im,kind,t,index)
 
 def subtitle_panel(im,fulltext,t,voice_duration):
