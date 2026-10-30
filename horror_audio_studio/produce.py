@@ -29,7 +29,7 @@ def read_wav(path):
 def voice_line(txt, path, voice, rate, pitch):
     # Independent generic synthesized narrator; deliberately not a clone of a real person.
     for trial in range(1,4):
-        p=subprocess.run(['edge-tts','--voice',voice,'--rate',rate,'--pitch',pitch,'--text',txt,'--write-media',str(path.with_suffix('.mp3'))],
+        p=subprocess.run(['edge-tts','--voice',voice,f'--rate={rate}',f'--pitch={pitch}','--text',txt,'--write-media',str(path.with_suffix('.mp3'))],
                          capture_output=True,text=True,timeout=80)
         if p.returncode==0 and path.with_suffix('.mp3').exists() and path.with_suffix('.mp3').stat().st_size>1000:break
         if trial==3:raise RuntimeError('Edge neural narration failed: '+p.stderr[-800:])
